@@ -26,7 +26,7 @@ type Client interface {
 	LookupInvoice(ctx context.Context, paymentHash string) (*lnrpc.Invoice, error)
 	SubscribeInvoice(ctx context.Context, id int64, paymentHash string) (invoicesrpc.Invoices_SubscribeSingleInvoiceClient, error)
 	DecodePaymentRequest(ctx context.Context, request string) (*lnrpc.PayReq, error)
-	SendPaymentSync(ctx context.Context, payReq string) (*lnrpc.SendResponse, error)
+	SendPaymentSync(ctx context.Context, payReq string, amount int64) (*lnrpc.SendResponse, error)
 }
 
 type client struct {
@@ -134,6 +134,6 @@ func (cl *client) DecodePaymentRequest(ctx context.Context, request string) (*ln
 	return cl.rpcClient.DecodePayReq(ctx, &lnrpc.PayReqString{PayReq: request})
 }
 
-func (cl *client) SendPaymentSync(ctx context.Context, payReq string) (*lnrpc.SendResponse, error) {
-	return cl.rpcClient.SendPaymentSync(ctx, &lnrpc.SendRequest{PaymentRequest: payReq})
+func (cl *client) SendPaymentSync(ctx context.Context, payReq string, amount int64) (*lnrpc.SendResponse, error) {
+	return cl.rpcClient.SendPaymentSync(ctx, &lnrpc.SendRequest{PaymentRequest: payReq, Amt: amount})
 }

@@ -9,6 +9,7 @@ import (
 	"log"
 	"time"
 
+	ext_types "lightning-poll/types"
 	votes_db "lightning-poll/votes/internal/db/votes"
 	"lightning-poll/votes/internal/types"
 )
@@ -103,8 +104,67 @@ func GetVotes(ctx context.Context, b Backends, pollID int64) ([]*Vote, error) {
 
 	var voteList []*Vote
 	for _, vote := range votes {
-		voteList = append(voteList, &Vote{ID: vote.ID, OptionID: vote.OptionID, Preimage: vote.Preimage})
+		voteList = append(voteList, &Vote{
+			ID:       vote.ID,
+			OptionID: vote.OptionID,
+			Preimage: vote.Preimage,
+			Hash:     vote.PayHash,
+			Amount:   vote.SettleAmount,
+		})
 	}
 
 	return voteList, nil
+}
+
+func ReleaseVotesForPoll(ctx context.Context, b Backends, pollID int64, shouldRepay ext_types.RepayScheme) (int64, error) {
+	results, err := GetResults(ctx, b, pollID)
+	if err != nil {
+		return 0, err
+	}
+
+	votes, err := GetVotes(ctx, b, pollID)
+	if err != nil {
+		return 0, err
+	}
+
+	var amount int64 = 0
+
+	for _, vote := range votes {
+		if shouldRepay(results, vote.OptionID) {
+			if err := releaseVote(ctx, b, vote.ID, vote.Hash); err != nil {
+				return 0, err
+			}
+		} else {
+			amount = amount + vote.Amount
+			if err := settleVote(ctx, b, vote.ID, vote.Preimage); err != nil {
+				return 0, err
+			}
+		}
+	}
+
+	return amount, nil
+}
+
+func releaseVote(ctx context.Context, b Backends, id int64, hash string) error {
+	if err := b.GetLND().CancelHoldInvoice(ctx, hash); err != nil {
+		return err
+	}
+	if err := votes_db.UpdateStatus(ctx, b.GetDB(), id, types.VoteStatusPaid,
+		types.VoteStatusReturned); err != nil {
+		return err
+	}
+
+	return nil
+}
+
+func settleVote(ctx context.Context, b Backends, id int64, preimage []byte) error {
+	if err := b.GetLND().SettleHoldInvoice(ctx, preimage); err != nil {
+		return err
+	}
+	if err := votes_db.UpdateStatus(ctx, b.GetDB(), id, types.VoteStatusPaid,
+		types.VoteStatusSettled); err != nil {
+		return err
+	}
+
+	return nil
 }

@@ -1,6 +1,7 @@
 package polls
 
 import (
+	"fmt"
 	"log"
 
 	"golang.org/x/net/context"
@@ -49,32 +50,36 @@ func closePoll(ctx context.Context, b Backends, poll *poll_db.DBPoll) error {
 		return err
 	}
 
-	results, err := votes.GetResults(ctx, b, poll.ID)
-	if err != nil {
-		return err
-	}
-
-	votes, err := votes.GetVotes(ctx, b, poll.ID)
-	if err != nil {
-		return err
-	}
-
-	shouldRepay := poll.RepayScheme.GetScheme()
-	for _, vote := range votes {
-		if shouldRepay(results, vote.OptionID) {
-			log.Printf("polls/ops: Should be releasing %v", vote)
-			continue
-		}
-		log.Printf("polls/ops: Should be settling %v", vote)
-	}
-
 	// all votes have been released, update poll's status
 	if err := poll_db.UpdateStatus(ctx, b.GetDB(), poll.ID, types.PollStatusClosed,
 		types.PollStatusReleased); err != nil {
 		return err
 	}
 
-	//TODO(carla): pay out the remainder to the poll creator
+	amount, err := votes.ReleaseVotesForPoll(ctx, b, poll.ID, poll.RepayScheme.GetScheme())
+	if err != nil {
+		return err
+	}
+
+	// update to paying out to prevent double sending if sync send payment fails
+	if err := poll_db.UpdateStatus(ctx, b.GetDB(), poll.ID, types.PollStatusReleased,
+		types.PollStatusPayingOut); err != nil {
+		return err
+	}
+
+	resp, err := b.GetLND().SendPaymentSync(ctx, poll.PayoutInvoice, amount)
+	if err != nil {
+		return err
+	}
+	if resp.PaymentError != "" {
+		return fmt.Errorf("polls/ops: closePoll %v error: %v", poll.ID, resp.PaymentError)
+	}
+
+	// poll has been paid out, update to final state
+	if err := poll_db.UpdateStatus(ctx, b.GetDB(), poll.ID, types.PollStatusPayingOut,
+		types.PollStatusPaidOut); err != nil {
+		return err
+	}
 
 	return nil
 }
