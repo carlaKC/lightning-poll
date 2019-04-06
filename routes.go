@@ -5,10 +5,13 @@ import (
 	"net/http"
 
 	"github.com/gin-gonic/gin"
+
+	"lightning-poll/lnd"
 )
 
 type Env struct {
-	db *sql.DB
+	db  *sql.DB
+	lnd lnd.Client
 }
 
 func initializeRoutes(e Env) {

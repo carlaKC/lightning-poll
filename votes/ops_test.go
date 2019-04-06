@@ -4,6 +4,7 @@ import (
 	"context"
 	"database/sql"
 	"lightning-poll/db"
+	"lightning-poll/lnd"
 	"lightning-poll/votes"
 	"lightning-poll/votes/internal/types"
 	"testing"
@@ -22,14 +23,19 @@ var (
 
 type testBackends struct {
 	dbc *sql.DB
+	lnd *lnd.MockLND
 }
 
 func (b *testBackends) GetDB() *sql.DB {
 	return b.dbc
 }
 
+func (b *testBackends) GetLND() lnd.Client {
+	return b.lnd
+}
+
 func setup(t *testing.T) (context.Context, votes.Backends) {
-	return context.Background(), &testBackends{dbc: db.ConnectForTesting(t)}
+	return context.Background(), &testBackends{dbc: db.ConnectForTesting(t), lnd: &lnd.MockLND{}}
 }
 
 func TestCreate(t *testing.T) {

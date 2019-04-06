@@ -3,6 +3,7 @@ package votes
 import (
 	"context"
 	"database/sql"
+	"lightning-poll/lnd"
 	"log"
 
 	votes_db "lightning-poll/votes/internal/db/votes"
@@ -11,7 +12,7 @@ import (
 
 type Backends interface {
 	GetDB() *sql.DB
-	//GetLND() TODO(carla): add LND
+	GetLND() lnd.Client
 }
 
 // Create initiates the process of voting for an option. It queries LND for
