@@ -27,6 +27,9 @@ create table votes(
   poll_id bigint not null,
   option_id bigint not null,
   pay_req  text not null,
+  payment_hash varchar(64) not null,
+  settle_index bigint,
+  settle_amount bigint,
   status tinyint not null,
 
   primary key(id)
