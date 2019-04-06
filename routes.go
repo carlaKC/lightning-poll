@@ -1,20 +1,25 @@
 package main
 
 import (
+	"database/sql"
 	"net/http"
 
 	"github.com/gin-gonic/gin"
 )
 
-func initializeRoutes() {
-	router.GET("/", showHomePage)
-	router.GET("/create", createPollPage)
-	router.GET("/view", viewPollPage)
-
-	router.POST("/create", createPollPost)
+type Env struct {
+	db *sql.DB
 }
 
-func showHomePage(c *gin.Context) {
+func initializeRoutes(e Env) {
+	router.GET("/", e.showHomePage)
+	router.GET("/create", e.createPollPage)
+	router.GET("/view", e.viewPollPage)
+
+	router.POST("/create", e.createPollPost)
+}
+
+func (e *Env) showHomePage(c *gin.Context) {
 	c.HTML(
 		http.StatusOK,
 		"home.html",
@@ -25,7 +30,7 @@ func showHomePage(c *gin.Context) {
 
 }
 
-func createPollPage(c *gin.Context) {
+func (e *Env) createPollPage(c *gin.Context) {
 	c.HTML(
 		http.StatusOK,
 		"create.html",
@@ -35,7 +40,7 @@ func createPollPage(c *gin.Context) {
 	)
 }
 
-func viewPollPage(c *gin.Context) {
+func (e *Env) viewPollPage(c *gin.Context) {
 	c.HTML(
 		http.StatusOK,
 		"view.html",
@@ -45,7 +50,7 @@ func viewPollPage(c *gin.Context) {
 	)
 }
 
-func createPollPost(c *gin.Context) {
+func (e *Env) createPollPost(c *gin.Context) {
 	// TODO(carla): handle post
 	c.HTML(
 		http.StatusOK,
