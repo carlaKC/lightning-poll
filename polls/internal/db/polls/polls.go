@@ -27,15 +27,7 @@ func Create(ctx context.Context, dbc *sql.DB, question, payoutInvoice string,
 		return 0, err
 	}
 
-	n, err := r.RowsAffected()
-	if err != nil {
-		return 0, err
-	}
-	if n != 1 {
-		return 0, db.ErrUnexpectedRowCount
-	}
-
-	return id, nil
+	return id, db.CheckRowsAffected(r, 1)
 }
 
 type DBPoll struct {
