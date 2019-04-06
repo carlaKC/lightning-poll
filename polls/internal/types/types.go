@@ -29,3 +29,24 @@ var (
 func (s RepayScheme) Valid() bool {
 	return s > RepaySchemeUnknown && s < repaySchemeSentinel
 }
+
+// repayScheme is a function which returns true if a vote should be refunded.
+type repayScheme func(votes map[int64]int64, optionID int64) bool
+
+var (
+	noRepayment = func(votes map[int64]int64, optionID int64) bool { return false }
+	notFound    = func(votes map[int64]int64, optionID int64) bool { return false }
+)
+
+var schemes = map[RepayScheme]repayScheme{
+	RepaySchemeUnknown: noRepayment,
+}
+
+func (s RepayScheme) GetScheme() repayScheme {
+	scheme, ok := schemes[s]
+	if !ok {
+		return notFound
+	}
+
+	return scheme
+}

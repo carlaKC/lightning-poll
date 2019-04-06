@@ -52,3 +52,17 @@ func GetResults(ctx context.Context, b Backends, pollID int64) (map[int64]int64,
 
 	return v, nil
 }
+
+func GetVotes(ctx context.Context, b Backends, pollID int64) ([]*Vote, error) {
+	votes, err := votes_db.ListByPollAndStatus(ctx, b.GetDB(), pollID, types.VoteStatusPaid)
+	if err != nil {
+		return nil, err
+	}
+
+	var voteList []*Vote
+	for _, vote := range votes {
+		voteList = append(voteList, &Vote{ID: vote.ID, OptionID: vote.OptionID})
+	}
+
+	return voteList, nil
+}

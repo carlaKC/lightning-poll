@@ -14,6 +14,14 @@ type Env struct {
 	lnd lnd.Client
 }
 
+func (e Env) GetDB() *sql.DB {
+	return e.db
+}
+
+func (e Env) GetLND() lnd.Client {
+	return e.lnd
+}
+
 func initializeRoutes(e Env) {
 	router.GET("/", e.showHomePage)
 	router.GET("/create", e.createPollPage)

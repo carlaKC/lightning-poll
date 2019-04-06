@@ -10,7 +10,7 @@ import (
 	"lightning-poll/polls/internal/types"
 )
 
-var cols = "id, status, created_at, question, expiry_seconds, repay_scheme, vote_sats, payout_invoice, user_id"
+var cols = "id, status, created_at,expires_at, question, expiry_seconds, repay_scheme, vote_sats, payout_invoice, user_id"
 
 type row interface {
 	Scan(dest ...interface{}) error
@@ -19,9 +19,11 @@ type row interface {
 func Create(ctx context.Context, dbc *sql.DB, question, payoutInvoice string,
 	repayScheme types.RepayScheme, expirySeconds, voteSats, userID int64) (int64, error) {
 	id := rand.Int63()
+	expiresAt := time.Now().Add(time.Second * time.Duration(expirySeconds) * -1)
+
 	r, err := dbc.ExecContext(ctx, "insert into polls set id=?, status=?, "+
-		"created_at=now(), question=?, expiry_seconds=?, repay_scheme=?, "+
-		"vote_sats=?, payout_invoice=?, user_id=?", id, types.PollStatusCreated,
+		"created_at=now(), expires_at=?, question=?, expiry_seconds=?, repay_scheme=?, "+
+		"vote_sats=?, payout_invoice=?, user_id=?", id, types.PollStatusCreated, expiresAt,
 		question, expirySeconds, repayScheme, voteSats, payoutInvoice, userID)
 	if err != nil {
 		return 0, err
@@ -34,6 +36,7 @@ type DBPoll struct {
 	ID            int64
 	Status        types.PollStatus
 	CreatedAt     time.Time
+	ExpiresAt     time.Time
 	Question      string
 	ExpirySeconds int64
 	RepayScheme   types.RepayScheme
@@ -46,8 +49,8 @@ func scan(r row) (poll DBPoll, err error) {
 	var invoice sql.NullString
 	var uid sql.NullInt64
 
-	err = r.Scan(&poll.ID, &poll.Status, &poll.CreatedAt, &poll.Question, &poll.ExpirySeconds,
-		&poll.RepayScheme, &poll.VoteSats, &invoice, &uid)
+	err = r.Scan(&poll.ID, &poll.Status, &poll.CreatedAt, &poll.ExpiresAt, &poll.Question,
+		&poll.ExpirySeconds, &poll.RepayScheme, &poll.VoteSats, &invoice, &uid)
 	if err != nil {
 		return poll, err
 	}
@@ -110,4 +113,10 @@ func UpdateStatus(ctx context.Context, dbc *sql.DB, id int64, fromStatus, toStat
 	}
 
 	return nil
+}
+
+// ListExpired returns a list of created votes which have expired
+func ListExpired(ctx context.Context, dbc *sql.DB) ([]*DBPoll, error) {
+	return list(ctx, dbc, "select * from polls where expires_at<now() "+
+		"and status=?", types.PollStatusCreated)
 }

@@ -8,7 +8,8 @@ var (
 	VoteStatusExpired  VoteStatus = 2
 	VoteStatusPaid     VoteStatus = 3
 	VoteStatusReturned VoteStatus = 4
-	voteStatusSentinel VoteStatus = 5
+	VoteStatusSettled  VoteStatus = 5
+	voteStatusSentinel VoteStatus = 6
 )
 
 func (s VoteStatus) Valid() bool {
