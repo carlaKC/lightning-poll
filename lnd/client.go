@@ -2,9 +2,13 @@ package lnd
 
 import (
 	"context"
+	"crypto/rand"
+	"crypto/sha256"
+	"encoding/hex"
 	"flag"
 
 	"github.com/lightningnetwork/lnd/lnrpc"
+	"github.com/lightningnetwork/lnd/lnrpc/invoicesrpc"
 	"github.com/pkg/errors"
 	"google.golang.org/grpc"
 	"google.golang.org/grpc/credentials"
@@ -15,6 +19,8 @@ var lnd_cert = flag.String("lnd_cert", "/home/lnd/.lnd/tls.cert", "lnd cert loca
 
 type Client interface {
 	AddInvoice(ctx context.Context, amount, expirySeconds int64, note string) (*lnrpc.Invoice, error)
+	AddHoldInvoice(ctx context.Context, amount, expirySeconds int64, note string) (*HoldInvoice, error)
+	CancelHoldInvoice(ctx context.Context, hash string) error
 	LookupInvoice(ctx context.Context, paymentHash string) (*lnrpc.Invoice, error)
 	SubscribeInvoices(ctx context.Context, minSettleIndex int64) (lnrpc.Lightning_SubscribeInvoicesClient, error)
 	DecodePaymentRequest(ctx context.Context, request string) (*lnrpc.PayReq, error)
@@ -22,8 +28,15 @@ type Client interface {
 }
 
 type client struct {
-	rpcConn   *grpc.ClientConn
-	rpcClient lnrpc.LightningClient
+	rpcConn       *grpc.ClientConn
+	rpcClient     lnrpc.LightningClient
+	invoiceClient invoicesrpc.InvoicesClient
+}
+
+type HoldInvoice struct {
+	Preimage []byte
+	PayHash  string
+	PayReq   string
 }
 
 // New returns a grpc client which connects to LND's rpc server.
@@ -49,6 +62,7 @@ func (cl *client) connect(address, cert, serverNameOverride string) error {
 	}
 	cl.rpcConn = conn
 	cl.rpcClient = lnrpc.NewLightningClient(conn)
+	cl.invoiceClient = invoicesrpc.NewInvoicesClient(conn)
 
 	return nil
 }
@@ -68,6 +82,39 @@ func (cl *client) AddInvoice(ctx context.Context, amount, expirySeconds int64, n
 	inv.AddIndex = resp.AddIndex
 
 	return inv, nil
+}
+
+func (cl *client) AddHoldInvoice(ctx context.Context, amount, expirySeconds int64, note string) (*HoldInvoice, error) {
+	var paymentPreimage [32]byte
+	rand.Read(paymentPreimage[:])
+	paymentHash := sha256.Sum256(paymentPreimage[:])
+
+	resp, err := cl.invoiceClient.AddHoldInvoice(ctx,
+		&invoicesrpc.AddHoldInvoiceRequest{Value: amount, Expiry: expirySeconds, Hash: paymentHash[:], Memo: note})
+	if err != nil {
+		return nil, err
+	}
+
+	return &HoldInvoice{
+		Preimage: paymentPreimage[:],
+		PayHash:  hex.EncodeToString(paymentHash[:]),
+		PayReq:   resp.PaymentRequest,
+	}, nil
+}
+
+func (cl *client) CancelHoldInvoice(ctx context.Context, hash string) error {
+	hashBytes, err := hex.DecodeString(hash)
+	if err != nil {
+		return err
+	}
+
+	_, err = cl.invoiceClient.CancelInvoice(ctx, &invoicesrpc.CancelInvoiceMsg{PaymentHash: hashBytes})
+	return err
+}
+
+func (cl *client) SettleHoldInvoice(ctx context.Context, preimage []byte) error {
+	_, err := cl.invoiceClient.SettleInvoice(ctx, &invoicesrpc.SettleInvoiceMsg{Preimage: preimage})
+	return err
 }
 
 func (cl *client) LookupInvoice(ctx context.Context, paymentHash string) (*lnrpc.Invoice, error) {

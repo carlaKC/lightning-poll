@@ -3,7 +3,6 @@ package votes
 import (
 	"context"
 	"database/sql"
-	"encoding/hex"
 	"fmt"
 	"lightning-poll/lnd"
 	"log"
@@ -20,20 +19,20 @@ type Backends interface {
 // Create initiates the process of voting for an option. It queries LND for
 // an invoice, saved it in the votes DB and returns it to the user.
 func Create(ctx context.Context, b Backends, pollID, optionID, sats, expiry int64) (int64, string, error) {
-	inv, err := b.GetLND().AddInvoice(ctx, sats, expiry, fmt.Sprintf("poll: %v, option: %v", pollID, optionID))
+	resp, err := b.GetLND().AddHoldInvoice(ctx, sats, expiry, fmt.Sprintf("poll: %v, option: %v", pollID, optionID))
 	if err != nil {
 		return 0, "", err
 	}
 
 	id, err := votes_db.Create(ctx, b.GetDB(), pollID, optionID, expiry,
-		inv.PaymentRequest, hex.EncodeToString(inv.RHash))
+		resp.PayReq, resp.PayHash, resp.Preimage)
 	if err != nil {
 		return 0, "", err
 	}
 
 	log.Printf("votes/ops: Created vote: %v", id)
 
-	return id, inv.PaymentRequest, nil
+	return id, resp.PayReq, nil
 }
 
 // GetResults returns a map of options IDs to vote counts.

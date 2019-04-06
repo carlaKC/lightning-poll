@@ -18,20 +18,20 @@ import (
   status tinyint not null,
 */
 
-var cols = "id, created_at, expires_at, poll_id, option_id, pay_req, payment_hash, settle_index, settle_amount, status"
+var cols = "id, created_at, expires_at, poll_id, option_id, pay_req, payment_hash, preimage, settle_index, settle_amount, status"
 
 type row interface {
 	Scan(dest ...interface{}) error
 }
 
-func Create(ctx context.Context, dbc *sql.DB, pollID, optionID, expirySeconds int64, payReq, payHash string) (int64, error) {
+func Create(ctx context.Context, dbc *sql.DB, pollID, optionID, expirySeconds int64, payReq, payHash string, preimage []byte) (int64, error) {
 	id := rand.Int63()
 	expiresAt := time.Now().Add(time.Second * time.Duration(expirySeconds) * -1)
 
 	r, err := dbc.ExecContext(ctx, "insert into votes set id=?, "+
 		"created_at=now(),expires_at=?, poll_id=?, option_id=?, pay_req=?,"+
-		"payment_hash=?, status=?", id,
-		expiresAt, pollID, optionID, payReq, payHash, types.VoteStatusCreated)
+		"payment_hash=?, preimage=?, status=?", id,
+		expiresAt, pollID, optionID, payReq, payHash, preimage, types.VoteStatusCreated)
 	if err != nil {
 		return 0, err
 	}
@@ -47,6 +47,7 @@ type DBVote struct {
 	OptionID     int64
 	PayReq       string
 	PayHash      string
+	Preimage     []byte
 	SettleIndex  int64
 	SettleAmount int64
 	Status       types.VoteStatus
@@ -55,7 +56,7 @@ type DBVote struct {
 func scan(r row) (vote DBVote, err error) {
 	var settleIndex, settleAmount sql.NullInt64
 	err = r.Scan(&vote.ID, &vote.CreatedAt, &vote.ExpiresAt, &vote.PollID, &vote.OptionID,
-		&vote.PayReq, &vote.PayHash, &settleIndex, &settleAmount, &vote.Status)
+		&vote.PayReq, &vote.PayHash, &vote.Preimage, &settleIndex, &settleAmount, &vote.Status)
 	if err != nil {
 		return vote, err
 	}

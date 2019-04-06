@@ -29,6 +29,7 @@ create table votes(
   option_id bigint not null,
   pay_req  text not null,
   payment_hash varchar(64) not null,
+  preimage varbinary(32) not null,
   settle_index bigint,
   settle_amount bigint,
   status tinyint not null,

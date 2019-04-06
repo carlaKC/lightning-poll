@@ -17,6 +17,7 @@ var (
 	testOptionID = int64(54678)
 	testInvoice  = "lnsb100n1pwfm4pwpp5dn7dgk3h98yqr9lxs79g98tkwl36gxhck6j66n23teftyuje9avqdq8w3jhxaqcqzysxqzfvyhv6jv007k4c05v5xhz2flzjs08j44z02yjex6qp0hrqd4f5sw794jwrhzhfztqkrzprnt755dd6w0zv0cpq5hjgvasr2j4vnhxawygp7v9z5x"
 	testPayHash  = "b168b765e28fa49a88991f36e27ffe4cd7dd330baba25752ddad90ef7cb013e6"
+	testPreimage = []byte{}
 )
 
 func setup(t *testing.T) (context.Context, *sql.DB) {
@@ -26,16 +27,16 @@ func setup(t *testing.T) (context.Context, *sql.DB) {
 func TestCreate(t *testing.T) {
 	ctx, dbc := setup(t)
 
-	_, err := votes.Create(ctx, dbc, testPollID, testOptionID, 10, testInvoice, testPayHash)
+	_, err := votes.Create(ctx, dbc, testPollID, testOptionID, 10, testInvoice, testPayHash, testPreimage)
 	assert.NoError(t, err)
 }
 
 func TestListByPollAndStatus(t *testing.T) {
 	ctx, dbc := setup(t)
 
-	_, err := votes.Create(ctx, dbc, testPollID, testOptionID, 10, testInvoice, testPayHash)
+	_, err := votes.Create(ctx, dbc, testPollID, testOptionID, 10, testInvoice, testPayHash, testPreimage)
 	assert.NoError(t, err)
-	_, err = votes.Create(ctx, dbc, testPollID, testOptionID, 10, testInvoice, testPayHash)
+	_, err = votes.Create(ctx, dbc, testPollID, testOptionID, 10, testInvoice, testPayHash, testPreimage)
 	assert.NoError(t, err)
 
 	vList, err := votes.ListByPollAndStatus(ctx, dbc, testPollID, types.VoteStatusCreated)
@@ -50,7 +51,7 @@ func TestListByPollAndStatus(t *testing.T) {
 func TestUpdateStatus(t *testing.T) {
 	ctx, dbc := setup(t)
 
-	id, err := votes.Create(ctx, dbc, testPollID, testOptionID, 10, testInvoice, testPayHash)
+	id, err := votes.Create(ctx, dbc, testPollID, testOptionID, 10, testInvoice, testPayHash, testPreimage)
 	assert.NoError(t, err)
 
 	err = votes.UpdateStatus(ctx, dbc, id, types.VoteStatusCreated, types.VoteStatusExpired)
@@ -64,7 +65,7 @@ func TestUpdateStatus(t *testing.T) {
 func TestSettle(t *testing.T) {
 	ctx, dbc := setup(t)
 
-	id, err := votes.Create(ctx, dbc, testPollID, testOptionID, 10, testInvoice, testPayHash)
+	id, err := votes.Create(ctx, dbc, testPollID, testOptionID, 10, testInvoice, testPayHash, testPreimage)
 	assert.NoError(t, err)
 
 	err = votes.Settle(ctx, dbc, id, 1, 4)
@@ -81,7 +82,7 @@ func TestListExpired(t *testing.T) {
 	assert.NoError(t, err)
 	assert.Len(t, expired, 0)
 
-	id, err := votes.Create(ctx, dbc, testPollID, testOptionID, 10, testInvoice, testPayHash)
+	id, err := votes.Create(ctx, dbc, testPollID, testOptionID, 10, testInvoice, testPayHash, testPreimage)
 	assert.NoError(t, err)
 	r, err := dbc.ExecContext(ctx, "update votes set expires_at=? where id=?", time.Now().Add(time.Hour*-1), id)
 	assert.NoError(t, err)
@@ -99,7 +100,7 @@ func TestGetLatestSettleIndex(t *testing.T) {
 	assert.NoError(t, err)
 	assert.Equal(t, int64(0), index)
 
-	id, err := votes.Create(ctx, dbc, testPollID, testOptionID, 10, testInvoice, testPayHash)
+	id, err := votes.Create(ctx, dbc, testPollID, testOptionID, 10, testInvoice, testPayHash, testPreimage)
 	assert.NoError(t, err)
 	err = votes.Settle(ctx, dbc, id, 1, 4)
 	assert.NoError(t, err)
