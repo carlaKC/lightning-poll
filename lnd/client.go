@@ -6,6 +6,7 @@ import (
 	"crypto/sha256"
 	"encoding/hex"
 	"flag"
+	"log"
 
 	"github.com/lightningnetwork/lnd/lnrpc"
 	"github.com/lightningnetwork/lnd/lnrpc/invoicesrpc"
@@ -21,8 +22,9 @@ type Client interface {
 	AddInvoice(ctx context.Context, amount, expirySeconds int64, note string) (*lnrpc.Invoice, error)
 	AddHoldInvoice(ctx context.Context, amount, expirySeconds int64, note string) (*HoldInvoice, error)
 	CancelHoldInvoice(ctx context.Context, hash string) error
+	SettleHoldInvoice(ctx context.Context, preimage []byte) error
 	LookupInvoice(ctx context.Context, paymentHash string) (*lnrpc.Invoice, error)
-	SubscribeInvoices(ctx context.Context, minSettleIndex int64) (lnrpc.Lightning_SubscribeInvoicesClient, error)
+	SubscribeInvoice(ctx context.Context, id int64, paymentHash string) (invoicesrpc.Invoices_SubscribeSingleInvoiceClient, error)
 	DecodePaymentRequest(ctx context.Context, request string) (*lnrpc.PayReq, error)
 	SendPaymentSync(ctx context.Context, payReq string) (*lnrpc.SendResponse, error)
 }
@@ -123,8 +125,9 @@ func (cl *client) LookupInvoice(ctx context.Context, paymentHash string) (*lnrpc
 	})
 }
 
-func (cl *client) SubscribeInvoices(ctx context.Context, minSettleIndex int64) (lnrpc.Lightning_SubscribeInvoicesClient, error) {
-	return cl.rpcClient.SubscribeInvoices(ctx, &lnrpc.InvoiceSubscription{SettleIndex: uint64(minSettleIndex)})
+func (cl *client) SubscribeInvoice(ctx context.Context, id int64, paymentHash string) (invoicesrpc.Invoices_SubscribeSingleInvoiceClient, error) {
+	log.Printf("lnd: SubscribeInvoice connecting for invoice: %v", id)
+	return cl.invoiceClient.SubscribeSingleInvoice(ctx, &lnrpc.PaymentHash{RHashStr: paymentHash})
 }
 
 func (cl *client) DecodePaymentRequest(ctx context.Context, request string) (*lnrpc.PayReq, error) {

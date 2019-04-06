@@ -9,15 +9,6 @@ import (
 	"time"
 )
 
-/*
- bigint not null,
-  created_at datetime not null,
-  poll_id bigint not null,
-  option_id bigint not null,
-  pay_req  text not null,
-  status tinyint not null,
-*/
-
 var cols = "id, created_at, expires_at, poll_id, option_id, pay_req, payment_hash, preimage, settle_index, settle_amount, status"
 
 type row interface {
@@ -102,7 +93,7 @@ func UpdateStatus(ctx context.Context, dbc *sql.DB, id int64, fromStatus, toStat
 	return db.CheckRowsAffected(r, 1)
 }
 
-func Settle(ctx context.Context, dbc *sql.DB, id, settleAmount int64, settleIndex uint64) error {
+func MarkPaid(ctx context.Context, dbc *sql.DB, id, settleAmount int64, settleIndex uint64) error {
 	r, err := dbc.ExecContext(ctx, "update votes set status=?, settle_index=?, "+
 		"settle_amount=? where id=?", types.VoteStatusPaid, settleIndex, settleAmount, id)
 	if err != nil {

@@ -3,9 +3,11 @@ package votes
 import (
 	"context"
 	"database/sql"
+	"encoding/hex"
 	"fmt"
 	"lightning-poll/lnd"
 	"log"
+	"time"
 
 	votes_db "lightning-poll/votes/internal/db/votes"
 	"lightning-poll/votes/internal/types"
@@ -31,8 +33,49 @@ func Create(ctx context.Context, b Backends, pollID, optionID, sats, expiry int6
 	}
 
 	log.Printf("votes/ops: Created vote: %v", id)
+	go subscribeIndividualInvoice(ctx, b, id, resp.PayHash)
 
 	return id, resp.PayReq, nil
+}
+
+func subscribeIndividualInvoice(ctx context.Context, b Backends, id int64, payHash string) {
+	cl, err := b.GetLND().SubscribeInvoice(ctx, id, payHash)
+	if err != nil {
+		log.Printf("subscribeIndividualInvoice error:%v", err)
+		return
+	}
+
+	maxIterations := 5
+	count := 0
+	for {
+		// just a sanity check so that these goroutines don't spiral off into infinity
+		count++
+		if count == maxIterations {
+			log.Printf("subscribeIndividualInvoice breaking out to prevent leak:%v", err)
+		}
+
+		if ctx.Err() != nil {
+			log.Printf("subscribeIndividualInvoice error:%v", err)
+			return
+		}
+
+		inv, err := cl.Recv()
+		if err != nil {
+			log.Printf("subscribeIndividualInvoice error:%v", err)
+			return
+		}
+
+		if inv.SettleIndex <= 0 {
+			log.Printf("votes/ops: settleInvoices stream received a non-settled invoice")
+			continue
+		}
+
+		if err := markInvoicePaid(ctx, b, hex.EncodeToString(inv.RHash), inv.AmtPaidSat, inv.SettleIndex); err != nil {
+			log.Printf("subscribeIndividualInvoice error:%v", err)
+			return
+		}
+		time.Sleep(time.Second * 30)
+	}
 }
 
 // GetResults returns a map of options IDs to vote counts.
@@ -60,7 +103,7 @@ func GetVotes(ctx context.Context, b Backends, pollID int64) ([]*Vote, error) {
 
 	var voteList []*Vote
 	for _, vote := range votes {
-		voteList = append(voteList, &Vote{ID: vote.ID, OptionID: vote.OptionID})
+		voteList = append(voteList, &Vote{ID: vote.ID, OptionID: vote.OptionID, Preimage: vote.Preimage})
 	}
 
 	return voteList, nil

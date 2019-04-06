@@ -62,16 +62,16 @@ func TestUpdateStatus(t *testing.T) {
 
 }
 
-func TestSettle(t *testing.T) {
+func TestMarkPaid(t *testing.T) {
 	ctx, dbc := setup(t)
 
 	id, err := votes.Create(ctx, dbc, testPollID, testOptionID, 10, testInvoice, testPayHash, testPreimage)
 	assert.NoError(t, err)
 
-	err = votes.Settle(ctx, dbc, id, 1, 4)
+	err = votes.MarkPaid(ctx, dbc, id, 1, 4)
 	assert.NoError(t, err)
 
-	err = votes.Settle(ctx, dbc, id, 1, 4)
+	err = votes.MarkPaid(ctx, dbc, id, 1, 4)
 	assert.Equal(t, db.ErrUnexpectedRowCount, err)
 }
 
@@ -102,7 +102,7 @@ func TestGetLatestSettleIndex(t *testing.T) {
 
 	id, err := votes.Create(ctx, dbc, testPollID, testOptionID, 10, testInvoice, testPayHash, testPreimage)
 	assert.NoError(t, err)
-	err = votes.Settle(ctx, dbc, id, 1, 4)
+	err = votes.MarkPaid(ctx, dbc, id, 1, 4)
 	assert.NoError(t, err)
 
 	index, err = votes.GetLatestSettleIndex(ctx, dbc)
