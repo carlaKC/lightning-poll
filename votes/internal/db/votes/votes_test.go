@@ -7,6 +7,7 @@ import (
 	"lightning-poll/votes/internal/db/votes"
 	"lightning-poll/votes/internal/types"
 	"testing"
+	"time"
 
 	"github.com/stretchr/testify/assert"
 )
@@ -24,16 +25,16 @@ func setup(t *testing.T) (context.Context, *sql.DB) {
 func TestCreate(t *testing.T) {
 	ctx, dbc := setup(t)
 
-	_, err := votes.Create(ctx, dbc, testPollID, testOptionID, testInvoice)
+	_, err := votes.Create(ctx, dbc, testPollID, testOptionID, 10, testInvoice)
 	assert.NoError(t, err)
 }
 
 func TestListByPollAndStatus(t *testing.T) {
 	ctx, dbc := setup(t)
 
-	_, err := votes.Create(ctx, dbc, testPollID, testOptionID, testInvoice)
+	_, err := votes.Create(ctx, dbc, testPollID, testOptionID, 10, testInvoice)
 	assert.NoError(t, err)
-	_, err = votes.Create(ctx, dbc, testPollID, testOptionID, testInvoice)
+	_, err = votes.Create(ctx, dbc, testPollID, testOptionID, 10, testInvoice)
 	assert.NoError(t, err)
 
 	vList, err := votes.ListByPollAndStatus(ctx, dbc, testPollID, types.VoteStatusCreated)
@@ -48,7 +49,7 @@ func TestListByPollAndStatus(t *testing.T) {
 func TestUpdateStatus(t *testing.T) {
 	ctx, dbc := setup(t)
 
-	id, err := votes.Create(ctx, dbc, testPollID, testOptionID, testInvoice)
+	id, err := votes.Create(ctx, dbc, testPollID, testOptionID, 10, testInvoice)
 	assert.NoError(t, err)
 
 	err = votes.UpdateStatus(ctx, dbc, id, types.VoteStatusCreated, types.VoteStatusExpired)
@@ -57,4 +58,22 @@ func TestUpdateStatus(t *testing.T) {
 	err = votes.UpdateStatus(ctx, dbc, id, types.VoteStatusExpired, types.VoteStatusExpired)
 	assert.Equal(t, db.ErrUnexpectedRowCount, err)
 
+}
+
+func TestListExpired(t *testing.T) {
+	ctx, dbc := setup(t)
+
+	expired, err := votes.ListExpired(ctx, dbc)
+	assert.NoError(t, err)
+	assert.Len(t, expired, 0)
+
+	id, err := votes.Create(ctx, dbc, testPollID, testOptionID, 10, testInvoice)
+	assert.NoError(t, err)
+	r, err := dbc.ExecContext(ctx, "update votes set expires_at=? where id=?", time.Now().Add(time.Hour*-1), id)
+	assert.NoError(t, err)
+	assert.NoError(t, db.CheckRowsAffected(r, 1))
+
+	expired, err = votes.ListExpired(ctx, dbc)
+	assert.NoError(t, err)
+	assert.Len(t, expired, 1)
 }

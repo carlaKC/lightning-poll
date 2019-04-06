@@ -18,17 +18,19 @@ import (
   status tinyint not null,
 */
 
-var cols = "id, created_at, poll_id, option_id, pay_req, status"
+var cols = "id, created_at, expires_at, poll_id, option_id, pay_req, status"
 
 type row interface {
 	Scan(dest ...interface{}) error
 }
 
-func Create(ctx context.Context, dbc *sql.DB, pollID, optionID int64, payReq string) (int64, error) {
+func Create(ctx context.Context, dbc *sql.DB, pollID, optionID, expirySeconds int64, payReq string) (int64, error) {
 	id := rand.Int63()
+	expiresAt := time.Now().Add(time.Second * time.Duration(expirySeconds) * -1)
+
 	r, err := dbc.ExecContext(ctx, "insert into votes set id=?, "+
-		"created_at=now(), poll_id=?, option_id=?, pay_req=?, status=?", id,
-		pollID, optionID, payReq, types.VoteStatusCreated)
+		"created_at=now(),expires_at=?, poll_id=?, option_id=?, pay_req=?, status=?", id,
+		expiresAt, pollID, optionID, payReq, types.VoteStatusCreated)
 	if err != nil {
 		return 0, err
 	}
@@ -39,6 +41,7 @@ func Create(ctx context.Context, dbc *sql.DB, pollID, optionID int64, payReq str
 type DBVote struct {
 	ID        int64
 	CreatedAt time.Time
+	ExpiresAt time.Time
 	PollID    int64
 	OptionID  int64
 	PayReq    string
@@ -46,7 +49,7 @@ type DBVote struct {
 }
 
 func scan(r row) (vote DBVote, err error) {
-	err = r.Scan(&vote.ID, &vote.CreatedAt, &vote.PollID, &vote.OptionID, &vote.PayReq, &vote.Status)
+	err = r.Scan(&vote.ID, &vote.CreatedAt, &vote.ExpiresAt, &vote.PollID, &vote.OptionID, &vote.PayReq, &vote.Status)
 	if err != nil {
 		return vote, err
 	}
@@ -83,4 +86,10 @@ func UpdateStatus(ctx context.Context, dbc *sql.DB, id int64, fromStatus, toStat
 	}
 
 	return db.CheckRowsAffected(r, 1)
+}
+
+// ListExpired returns a list of created votes which have expired
+func ListExpired(ctx context.Context, dbc *sql.DB) ([]*DBVote, error) {
+	return list(ctx, dbc, "select * from votes where expires_at<now() "+
+		"and status=?", types.VoteStatusCreated)
 }

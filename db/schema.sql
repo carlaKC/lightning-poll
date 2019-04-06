@@ -23,6 +23,7 @@ create table poll_options(
 create table votes(
   id bigint not null,
   created_at datetime not null,
+  expires_at datetime not null,
   poll_id bigint not null,
   option_id bigint not null,
   pay_req  text not null,
