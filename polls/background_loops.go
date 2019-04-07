@@ -65,6 +65,7 @@ func closePoll(ctx context.Context, b Backends, poll *poll_db.DBPoll) error {
 
 	// the poll creator does not need to be paid out.
 	if amount == 0 {
+		log.Printf("polls/ops: poll %v has no balance to pay out", poll.ID)
 		return poll_db.UpdateStatus(ctx, b.GetDB(), poll.ID, types.PollStatusReleased,
 			types.PollStatusPaidOut)
 	}

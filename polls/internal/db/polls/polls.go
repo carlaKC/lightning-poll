@@ -3,6 +3,7 @@ package polls
 import (
 	"context"
 	"database/sql"
+	"log"
 	"math/rand"
 	"time"
 
@@ -20,11 +21,10 @@ type row interface {
 func Create(ctx context.Context, dbc *sql.DB, question, payoutInvoice string,
 	repayScheme ext_types.RepayScheme, expirySeconds, voteSats, userID int64) (int64, error) {
 	id := rand.Int63()
-	expiresAt := time.Now().Add(time.Second * time.Duration(expirySeconds) * 1)
 
 	r, err := dbc.ExecContext(ctx, "insert into polls set id=?, status=?, "+
-		"created_at=now(), expires_at=?, question=?, expiry_seconds=?, repay_scheme=?, "+
-		"vote_sats=?, payout_invoice=?, user_id=?", id, types.PollStatusCreated, expiresAt,
+		"created_at=now(), expires_at=DATE_ADD(now(), INTERVAL ? SECOND), question=?, expiry_seconds=?, repay_scheme=?, "+
+		"vote_sats=?, payout_invoice=?, user_id=?", id, types.PollStatusCreated, expirySeconds,
 		question, expirySeconds, repayScheme, voteSats, payoutInvoice, userID)
 	if err != nil {
 		return 0, err
@@ -112,7 +112,8 @@ func UpdateStatus(ctx context.Context, dbc *sql.DB, id int64, fromStatus, toStat
 	if n != 1 {
 		return db.ErrUnexpectedRowCount
 	}
-
+	//TODO(carla): remove this once debugging is done
+	log.Printf("polls: UpdateStatus poll: %v updated %v -> %v", id, fromStatus, toStatus)
 	return nil
 }
 

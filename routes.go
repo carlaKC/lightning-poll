@@ -5,7 +5,6 @@ import (
 	"database/sql"
 	"fmt"
 	"lightning-poll/votes"
-	"log"
 	"net/http"
 	"strconv"
 	"strings"
@@ -75,7 +74,7 @@ func (e *Env) viewPollPage(c *gin.Context) {
 	if err != nil {
 		c.AbortWithError(http.StatusInternalServerError, err)
 	}
-	log.Println("CKC unix is ", poll.ClosesAt.Unix())
+
 	c.HTML(
 		http.StatusOK,
 		"view.html",
@@ -125,7 +124,6 @@ func getInt(c *gin.Context, field string) int64 {
 }
 
 func getPostInt(c *gin.Context, field string) int64 {
-	log.Println("CKC getPostInt", field, c.PostForm(field))
 	num, err := strconv.ParseInt(c.PostForm(field), 10, 64)
 	if err != nil {
 		c.AbortWithError(http.StatusInternalServerError, err)
