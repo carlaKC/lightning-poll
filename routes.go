@@ -161,8 +161,8 @@ func (e *Env) createVotePost(c *gin.Context) {
 		c.AbortWithError(http.StatusInternalServerError, err)
 	}
 	expirySeconds := time.Now().Sub(poll.ClosesAt).Seconds()
-
-	id, err := votes.Create(c.Request.Context(), e, pollID, optionID, poll.Cost, int64(expirySeconds))
+	note := fmt.Sprintf("Vote: %v for poll: %v", c.PostForm("opt_str"), c.PostForm("poll_str"))
+	id, err := votes.Create(c.Request.Context(), e, pollID, optionID, poll.Cost, int64(expirySeconds), note)
 	if err != nil {
 		c.AbortWithError(http.StatusInternalServerError, err)
 	}

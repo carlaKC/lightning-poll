@@ -4,7 +4,6 @@ import (
 	"context"
 	"database/sql"
 	"encoding/hex"
-	"fmt"
 	"lightning-poll/lnd"
 	"log"
 
@@ -22,8 +21,8 @@ type Backends interface {
 
 // Create initiates the process of voting for an option. It queries LND for
 // an invoice, saved it in the votes DB and returns it to the user.
-func Create(ctx context.Context, b Backends, pollID, optionID, sats, expiry int64) (int64, error) {
-	resp, err := b.GetLND().AddHoldInvoice(ctx, sats, expiry, fmt.Sprintf("poll: %v, option: %v", pollID, optionID))
+func Create(ctx context.Context, b Backends, pollID, optionID, sats, expiry int64, note string) (int64, error) {
+	resp, err := b.GetLND().AddHoldInvoice(ctx, sats, expiry, note)
 	if err != nil {
 		return 0, err
 	}

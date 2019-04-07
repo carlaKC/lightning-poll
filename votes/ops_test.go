@@ -19,6 +19,7 @@ var (
 	testOptionID = int64(45678)
 	testSats     = int64(10)
 	testExpiry   = int64(100)
+	testNote     = "test note"
 )
 
 type testBackends struct {
@@ -41,7 +42,7 @@ func setup(t *testing.T) (context.Context, votes.Backends) {
 func TestCreate(t *testing.T) {
 	ctx, b := setup(t)
 
-	_, err := votes.Create(ctx, b, testPollID, testOptionID, testSats, testExpiry)
+	_, err := votes.Create(ctx, b, testPollID, testOptionID, testSats, testExpiry, testNote)
 	assert.NoError(t, err)
 }
 
@@ -50,21 +51,21 @@ func TestGetVotes(t *testing.T) {
 
 	testOptionID2 := int64(876)
 
-	id1, err := votes.Create(ctx, b, testPollID, testOptionID, testSats, testExpiry)
+	id1, err := votes.Create(ctx, b, testPollID, testOptionID, testSats, testExpiry, testNote)
 	assert.NoError(t, err)
 	err = votes_db.UpdateStatus(ctx, b.GetDB(), id1, types.VoteStatusCreated, types.VoteStatusPaid)
 	assert.NoError(t, err)
 
-	id2, err := votes.Create(ctx, b, testPollID, testOptionID, testSats, testExpiry)
+	id2, err := votes.Create(ctx, b, testPollID, testOptionID, testSats, testExpiry, testNote)
 	assert.NoError(t, err)
 	err = votes_db.UpdateStatus(ctx, b.GetDB(), id2, types.VoteStatusCreated, types.VoteStatusPaid)
 	assert.NoError(t, err)
 
-	id3, err := votes.Create(ctx, b, testPollID, testOptionID2, testSats, testExpiry)
+	id3, err := votes.Create(ctx, b, testPollID, testOptionID2, testSats, testExpiry, testNote)
 	assert.NoError(t, err)
 	err = votes_db.UpdateStatus(ctx, b.GetDB(), id3, types.VoteStatusCreated, types.VoteStatusPaid)
 	assert.NoError(t, err)
-	_, err = votes.Create(ctx, b, testPollID, testOptionID2, testSats, testExpiry)
+	_, err = votes.Create(ctx, b, testPollID, testOptionID2, testSats, testExpiry, testNote)
 	assert.NoError(t, err)
 
 	v, err := votes.GetResults(ctx, b, testPollID)
