@@ -103,6 +103,23 @@ func ListActivePolls(ctx context.Context, b Backends) ([]*Poll, error) {
 		return nil, err
 	}
 
+	return getList(ctx, b, polls)
+}
+
+func ListInactivePolls(ctx context.Context, b Backends) ([]*Poll, error) {
+	closed, err := poll_db.ListByStatus(ctx, b.GetDB(), types.PollStatusClosed)
+	if err != nil {
+		return nil, err
+	}
+	paidOut, err := poll_db.ListByStatus(ctx, b.GetDB(), types.PollStatusPaidOut)
+	if err != nil {
+		return nil, err
+	}
+
+	return getList(ctx, b, append(paidOut, closed...))
+}
+
+func getList(ctx context.Context, b Backends, polls []*poll_db.DBPoll) ([]*Poll, error) {
 	var pollList []*Poll
 	for _, poll := range polls {
 		p, err := LookupPoll(ctx, b, poll.ID)

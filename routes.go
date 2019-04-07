@@ -42,7 +42,12 @@ func initializeRoutes(e Env) {
 }
 
 func (e *Env) showHomePage(c *gin.Context) {
-	polls, err := polls.ListActivePolls(context.Background(), e)
+	open, err := polls.ListActivePolls(c.Request.Context(), e)
+	if err != nil {
+		c.AbortWithError(http.StatusInternalServerError, err)
+	}
+
+	inactive, err := polls.ListInactivePolls(c.Request.Context(), e)
 	if err != nil {
 		c.AbortWithError(http.StatusInternalServerError, err)
 	}
@@ -51,8 +56,9 @@ func (e *Env) showHomePage(c *gin.Context) {
 		http.StatusOK,
 		"home.html",
 		gin.H{
-			"title": "Lightning Poll - Home",
-			"polls": polls,
+			"title":  "Lightning Poll - Home",
+			"open":   open,
+			"closed": inactive,
 		},
 	)
 

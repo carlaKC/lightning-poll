@@ -46,11 +46,18 @@
         <a href="/create" ><button class="create-button">Create Poll</button></a>
         <br>
         <br>
-        {{ if .polls}}
-            <h2>Existing Polls</h2>
-                {{ range .polls}}
+        {{ if .open}}
+            <h2>Open Polls</h2>
+                {{ range .open}}
                     <p><a href="/view/{{.ID}}">{{.Question}}</a></p>
                 {{end}}
+        {{end}}
+        <br>
+        {{ if .closed}}
+            <h2>Closed Polls</h2>
+            {{ range .closed}}
+                <p><a href="/view/{{.ID}}">{{.Question}}</a></p>
+            {{end}}
         {{end}}
     </div>
 
