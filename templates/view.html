@@ -59,6 +59,12 @@
 <form action="/results/{{.poll.ID}}" method="GET">
     <button class="submit">See Results</button>
 </form>
+<br>
+<br>
+<form action="/close" method="POST">
+    <input type="hidden" name="id" id="id" value="{{.poll.ID}}">
+    <button class="submit">[!Demo] Force Close</button>
+</form>
 
 </body>
 </html>

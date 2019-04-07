@@ -131,3 +131,14 @@ func getList(ctx context.Context, b Backends, polls []*poll_db.DBPoll) ([]*Poll,
 
 	return pollList, nil
 }
+
+func FoceClosePoll(ctx context.Context, b Backends, id int64) error {
+	log.Printf("polls.ops: FoceClosePoll closing poll %v", id)
+
+	dbPoll, err := poll_db.Lookup(ctx, b.GetDB(), id)
+	if err != nil {
+		return err
+	}
+
+	return ClosePoll(ctx, b, dbPoll)
+}

@@ -34,7 +34,7 @@ func closePolls(b Backends) error {
 	}
 
 	for _, poll := range polls {
-		if err := closePoll(ctx, b, poll); err != nil {
+		if err := ClosePoll(ctx, b, poll); err != nil {
 			return err
 		}
 	}
@@ -46,7 +46,7 @@ func closePolls(b Backends) error {
 // - update the poll to closed, so that it cannot receive any more votes
 // - return payments to voters, according to the chosen repayment scheme
 // - pay the creator the total remaining
-func closePoll(ctx context.Context, b Backends, poll *poll_db.DBPoll) error {
+func ClosePoll(ctx context.Context, b Backends, poll *poll_db.DBPoll) error {
 	if err := poll_db.UpdateStatus(ctx, b.GetDB(), poll.ID, types.PollStatusCreated,
 		types.PollStatusClosed); err != nil {
 		return err

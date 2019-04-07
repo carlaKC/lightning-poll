@@ -56,7 +56,7 @@
         {{ if .closed}}
             <h2>Closed Polls</h2>
             {{ range .closed}}
-                <p><a href="/view/{{.ID}}">{{.Question}}</a></p>
+                <p><a href="/results/{{.ID}}">{{.Question}}</a></p>
             {{end}}
         {{end}}
     </div>
