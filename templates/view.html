@@ -10,7 +10,13 @@
 {{ if .poll.Options}}
     <ul>
     {{range .poll.Options}}
-        <li id="{{.ID}}">{{.Value}}</li>
+        <li id="{{.ID}}">{{.Value}}<form action="/vote" method="POST">
+                <input type="hidden" name="id" id="id" value="{{.ID}}">
+                <input type="hidden" name="poll_id" id="poll_id" value="{{$.poll.ID}}">
+                <input class="text-small-uppercase" id="submit" type="submit" value="Vote">
+            </form>
+        </li>
+        <br>
     {{end}}
     </ul>
 {{end}}

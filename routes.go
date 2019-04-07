@@ -5,9 +5,11 @@ import (
 	"database/sql"
 	"fmt"
 	"lightning-poll/votes"
+	"log"
 	"net/http"
 	"strconv"
 	"strings"
+	"time"
 
 	"github.com/gin-gonic/gin"
 
@@ -73,13 +75,14 @@ func (e *Env) viewPollPage(c *gin.Context) {
 	if err != nil {
 		c.AbortWithError(http.StatusInternalServerError, err)
 	}
-
+	log.Println("CKC unix is ", poll.ClosesAt.Unix())
 	c.HTML(
 		http.StatusOK,
 		"view.html",
 		gin.H{
-			"title": "Lightning Poll -View Poll",
+			"title": "Lightning Poll - View Poll",
 			"poll":  poll,
+			"unix":  int64(poll.ClosesAt.Unix()),
 		},
 	)
 }
@@ -122,6 +125,7 @@ func getInt(c *gin.Context, field string) int64 {
 }
 
 func getPostInt(c *gin.Context, field string) int64 {
+	log.Println("CKC getPostInt", field, c.PostForm(field))
 	num, err := strconv.ParseInt(c.PostForm(field), 10, 64)
 	if err != nil {
 		c.AbortWithError(http.StatusInternalServerError, err)
@@ -152,11 +156,15 @@ func (e *Env) createPollPost(c *gin.Context) {
 
 func (e *Env) createVotePost(c *gin.Context) {
 	pollID := getPostInt(c, "poll_id")
-	optionID := getPostInt(c, "option_id")
-	expiry := getPostInt(c, "expiry")
-	expirySeconds := expiry * 60 * 60 // hours to seconds
+	optionID := getPostInt(c, "id")
 
-	id, err := votes.Create(c.Request.Context(), e, pollID, optionID, expirySeconds, expiry)
+	poll, err := polls.LookupPoll(c.Request.Context(), e, pollID)
+	if err != nil {
+		c.AbortWithError(http.StatusInternalServerError, err)
+	}
+	expirySeconds := time.Now().Sub(poll.ClosesAt).Seconds()
+
+	id, err := votes.Create(c.Request.Context(), e, pollID, optionID, poll.Cost, int64(expirySeconds))
 	if err != nil {
 		c.AbortWithError(http.StatusInternalServerError, err)
 	}
