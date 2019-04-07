@@ -1,6 +1,8 @@
 package polls
 
-import "time"
+import (
+	"time"
+)
 
 type Poll struct {
 	ID       int64

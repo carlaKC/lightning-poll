@@ -10,12 +10,13 @@ import (
 	"lightning-poll/db"
 	"lightning-poll/polls/internal/db/polls"
 	"lightning-poll/polls/internal/types"
+	ext_types "lightning-poll/types"
 )
 
 var (
 	testQuestion = "test question"
 	testInvoice  = "lnsb100n1pwfm4pwpp5dn7dgk3h98yqr9lxs79g98tkwl36gxhck6j66n23teftyuje9avqdq8w3jhxaqcqzysxqzfvyhv6jv007k4c05v5xhz2flzjs08j44z02yjex6qp0hrqd4f5sw794jwrhzhfztqkrzprnt755dd6w0zv0cpq5hjgvasr2j4vnhxawygp7v9z5x"
-	testRepay    = types.RepaySchemeAll
+	testRepay    = ext_types.RepaySchemeAll
 	testExpiry   = int64(100)
 	testVoteSats = int64(10)
 	testUser     = int64(123)

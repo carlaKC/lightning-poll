@@ -3,13 +3,14 @@ package main
 import (
 	"context"
 	"database/sql"
-	"lightning-poll/polls"
+	"errors"
 	"net/http"
 	"strconv"
 
 	"github.com/gin-gonic/gin"
 
 	"lightning-poll/lnd"
+	"lightning-poll/polls"
 )
 
 type Env struct {
@@ -61,15 +62,11 @@ func (e *Env) createPollPage(c *gin.Context) {
 }
 
 func (e *Env) viewPollPage(c *gin.Context) {
-	idStr, ok := c.Params.Get("id")
-	if !ok {
-		c.AbortWithStatus(http.StatusBadRequest)
-	}
-
-	id, err := strconv.ParseInt(idStr, 10, 64)
+	id, err := getInt(c, "id")
 	if err != nil {
 		c.AbortWithError(http.StatusBadRequest, err)
 	}
+
 	poll, err := polls.LookupPoll(context.Background(), e, id)
 	if err != nil {
 		c.AbortWithError(http.StatusInternalServerError, err)
@@ -85,7 +82,38 @@ func (e *Env) viewPollPage(c *gin.Context) {
 	)
 }
 
+func getInt(c *gin.Context, field string) (int64, error) {
+	str, ok := c.Params.Get(field)
+	if !ok {
+		return 0, errors.New("Field name not set")
+	}
+
+	return strconv.ParseInt(str, 10, 64)
+}
+
 func (e *Env) createPollPost(c *gin.Context) {
+	question, ok := c.Params.Get("question")
+	if !ok {
+		c.AbortWithStatus(http.StatusBadRequest)
+	}
+
+	payReq, ok := c.Params.Get("invoice")
+	if !ok {
+		c.AbortWithStatus(http.StatusBadRequest)
+	}
+
+	sats, err := getInt(c, "satohis")
+	if err != nil {
+		c.AbortWithError(http.StatusBadRequest, err)
+	}
+
+	expiry, err := getInt(c, "expiry")
+	if err != nil {
+		c.AbortWithError(http.StatusBadRequest, err)
+	}
+	expirySeconds := expiry * 60 * 60 // hours to seconds
+
+	id, err := polls.CreatePoll(context.Background(), e, question, payReq, polls.RepaySchemeMajority, expirySeconds, sats, 0)
 	// TODO(carla): handle post
 	c.HTML(
 		http.StatusOK,
@@ -94,4 +122,6 @@ func (e *Env) createPollPost(c *gin.Context) {
 			"title": "Create Poll",
 		},
 	)
+	c.Re
+	e.viewPollPage(c)
 }

@@ -11,6 +11,7 @@ import (
 	options_db "lightning-poll/polls/internal/db/options"
 	poll_db "lightning-poll/polls/internal/db/polls"
 	"lightning-poll/polls/internal/types"
+	ext_types "lightning-poll/types"
 )
 
 var expiryBufferSeconds int64 = 60 * 60 * 12 // 12 hours in seconds
@@ -25,7 +26,7 @@ var (
 	ErrPayoutExpiry   = errors.New("Payout invoice expires too soon")
 )
 
-func CreatePoll(ctx context.Context, b Backends, question, payReq string, repayScheme types.RepayScheme, options []string, expirySeconds, voteSats, userID int64) (int64, error) {
+func CreatePoll(ctx context.Context, b Backends, question, payReq string, repayScheme ext_types.RepayScheme, options []string, expirySeconds, voteSats, userID int64) (int64, error) {
 	if err := validatePayout(ctx, b, payReq, expirySeconds); err != nil {
 		return 0, err
 	}

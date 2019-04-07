@@ -8,6 +8,7 @@ import (
 
 	"lightning-poll/db"
 	"lightning-poll/polls/internal/types"
+	ext_types "lightning-poll/types"
 )
 
 var cols = "id, status, created_at,expires_at, question, expiry_seconds, repay_scheme, vote_sats, payout_invoice, user_id"
@@ -17,7 +18,7 @@ type row interface {
 }
 
 func Create(ctx context.Context, dbc *sql.DB, question, payoutInvoice string,
-	repayScheme types.RepayScheme, expirySeconds, voteSats, userID int64) (int64, error) {
+	repayScheme ext_types.RepayScheme, expirySeconds, voteSats, userID int64) (int64, error) {
 	id := rand.Int63()
 	expiresAt := time.Now().Add(time.Second * time.Duration(expirySeconds) * -1)
 
@@ -39,7 +40,7 @@ type DBPoll struct {
 	ExpiresAt     time.Time
 	Question      string
 	ExpirySeconds int64
-	RepayScheme   types.RepayScheme
+	RepayScheme   ext_types.RepayScheme
 	VoteSats      int64
 	PayoutInvoice string
 	UserID        int64

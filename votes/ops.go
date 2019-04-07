@@ -116,7 +116,7 @@ func GetVotes(ctx context.Context, b Backends, pollID int64) ([]*Vote, error) {
 	return voteList, nil
 }
 
-func ReleaseVotesForPoll(ctx context.Context, b Backends, pollID int64, shouldRepay ext_types.RepayScheme) (int64, error) {
+func ReleaseVotesForPoll(ctx context.Context, b Backends, pollID int64, shouldRepay ext_types.RepaySchemeFunc) (int64, error) {
 	results, err := GetResults(ctx, b, pollID)
 	if err != nil {
 		return 0, err
