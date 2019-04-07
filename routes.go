@@ -66,11 +66,13 @@ func (e *Env) showHomePage(c *gin.Context) {
 }
 
 func (e *Env) createPollPage(c *gin.Context) {
+
 	c.HTML(
 		http.StatusOK,
 		"create.html",
 		gin.H{
-			"title": "Lightning Poll - Create",
+			"title":     "Lightning Poll - Create",
+			"repayment": types.GetRepaySchemes(),
 		},
 	)
 }
@@ -192,8 +194,10 @@ func (e *Env) createPollPost(c *gin.Context) {
 
 	options := c.PostForm("added[]")
 
+	getPostInt(c, "payout")
+
 	id, err := polls.CreatePoll(context.Background(), e, question, payReq,
-		types.RepaySchemeMajority, strings.Split(options, ","), expirySeconds, sats, 0)
+		getPostInt(c, "payout"), strings.Split(options, ","), expirySeconds, sats, 0)
 	if err != nil {
 		c.AbortWithError(http.StatusInternalServerError, err)
 	}

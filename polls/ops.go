@@ -3,6 +3,7 @@ package polls
 import (
 	"context"
 	"database/sql"
+	"fmt"
 	"lightning-poll/lnd"
 	"log"
 
@@ -26,12 +27,16 @@ var (
 	ErrPayoutExpiry   = errors.New("Payout invoice expires too soon")
 )
 
-func CreatePoll(ctx context.Context, b Backends, question, payReq string, repayScheme ext_types.RepayScheme, options []string, expirySeconds, voteSats, userID int64) (int64, error) {
+func CreatePoll(ctx context.Context, b Backends, question, payReq string, repayScheme int64, options []string, expirySeconds, voteSats, userID int64) (int64, error) {
 	if err := validatePayout(ctx, b, payReq, expirySeconds); err != nil {
 		return 0, err
 	}
 
-	id, err := poll_db.Create(ctx, b.GetDB(), question, payReq, repayScheme, expirySeconds, voteSats, userID)
+	scheme := ext_types.RepayScheme(repayScheme)
+	if !scheme.Valid() {
+		return 0, fmt.Errorf("Repay scheme: %v invalid", scheme)
+	}
+	id, err := poll_db.Create(ctx, b.GetDB(), question, payReq, scheme, expirySeconds, voteSats, userID)
 	if err != nil {
 		return 0, err
 	}

@@ -80,10 +80,17 @@
                         <br>
                         <input class="text-body" id="invoice" name="invoice" type="text" required>
 
-                    <input type="hidden" name="added[]" id="added[]" value="">
+                        <input type="hidden" name="added[]" id="added[]" value="">
 
                     <br>
                     <br>
+
+                    <label for="payout" class="text-small-uppercase">Refund strategy:</label>
+                    <br>
+                    {{range .repayment}}
+                        <input type="radio" name="payout" value="{{.ID}}" required > {{.Name}}<br>
+                    {{end}}
+                    <input type="hidden" id="payout_id" name="payout_id" type="text" required>
 
                 </form>
             <br>
