@@ -1,76 +1,106 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-    <link href="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-ggOyR0iXCbMQv3Xipma34MD+dH/1fQ784/j6cY/iJTQUOhcWr7x9JvoRxT2MZw1T" crossorigin="anonymous">
-    <meta charset="UTF-8">
+   <meta charset="UTF-8">
     <title>Lightning Poll - Create</title>
+
+    <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/css/bootstrap.min.css" integrity="sha384-ggOyR0iXCbMQv3Xipma34MD+dH/1fQ784/j6cY/iJTQUOhcWr7x9JvoRxT2MZw1T" crossorigin="anonymous">
+
+    <style>
+        body{
+            vertical-align: middle;
+            position: relative;
+            text-align: center;
+            padding-top: 80px;
+            padding-bottom: 80px;
+            padding-left: 250px;
+            padding-right: 250px;
+        }
+
+        .text-headline{
+            text-align: center;
+        }
+
+        .submit{
+            background: #FFEBAC;
+            border: #FFEBAC;
+            padding: 10px;
+            min-width: 150px;
+            height: 54px;
+            padding: 0 30px;
+            border-radius: 70px;
+            font-size: 14px;
+            line-height: 54px;
+            font-weight: 700;
+            text-transform: uppercase;
+            -webkit-transition-duration: 500ms;
+            transition-duration: 500ms;
+        }
+
+        .option{
+
+        }
+
+
+    </style>
 </head>
 <body>
 <main>
-    <div class="row">
-        <div class ="col-md-12">
-            <div class="headline">
-                <h2 class="text-headline">Create Lightning Poll</h2>
-                <h2 class="text-subheadline">Put your satoshis where your mouth is</h2>
-            </div>
-        </div>
-    </div>
 
-    <div class="row">
-        <div class ="col-md-6">
 
-            <form action="/create" method="POST">
-                <span>
-                  <label for="question" class="text-small-uppercase">Question</label>
-                  <input class="text-body" id="question" name="question" type="text" required>
-                </span>
+                <div class="headline">
+                    <h2 class="text-headline">Create Lightning Poll</h2>
+                </div>
 
-                <br>
-                <br>
 
-                <span>
-                  <label for="satoshis" class="text-small-uppercase">Satoshi per Vote</label>
-                  <input class="text-body" id="satoshis" name="satoshis" type="number" required>
-                </span>
+        <div class="form-inputs">
+                <form id="create-poll" action="/create" method="POST">
+                        <label for="question" class="text-small-uppercase">Question:</label>
+                        <br>
+                        <input class="text-body" id="question" name="question" type="text" required>
 
-                <br>
-                <br>
+                    <br>
+                    <br>
 
-                <span>
-                  <label for="expiry" class="text-small-uppercase">Expiry(hours)</label>
-                  <input class="text-body" id="expiry" name="expiry" type="number" required>
-                </span>
+                        <label for="satoshis" class="text-small-uppercase">Satoshi per Vote:</label>
+                        <br>
+                        <input class="text-body" id="satoshis" name="satoshis" type="number" required>
 
-                <br>
-                <br>
-                <span>
-                  <label for="invoice" class="text-small-uppercase">Payout Invoice</label>
-                    <input class="text-body" id="invoice" name="invoice" type="text" required>
-                </span>
+                    <br>
+                    <br>
 
-                <br>
-                <br>
+                        <label for="expiry" class="text-small-uppercase">Expiry(hours):</label>
+                        <br>
+                        <input class="text-body" id="expiry" name="expiry" type="number" required>
 
-                <span>
+                    <br>
+                    <br>
+
+                        <label for="invoice" class="text-small-uppercase">Payout Invoice:</label>
+                        <br>
+                        <input class="text-body" id="invoice" name="invoice" type="text" required>
+
                     <input type="hidden" name="added[]" id="added[]" value="">
-                 </span>
 
-                <br>
-                <br>
+                    <br>
+                    <br>
 
-                <input class="text-small-uppercase" id="submit" type="submit" value="Create Poll" onclick="getOptions()">
-            </form>
-
-        </div>
-
-        <div class ="col-md-6">
+                </form>
+            <br>
+            <label >Options for poll:</label>
             <div id="options">
+                <input class="text-body" class="option" id="option" name="option" type="text">
+                <br>
+                <br>
                 <input class="text-body" class="option" id="option" name="option" type="text">
             </div>
             <br>
-            <button class="text-small-uppercase" id="addOption" onclick="addOptionField()">Add Option</button>
+            <button class="submit"  id="addOption" onclick="addOptionField()">Add Option</button>
+            <br>
+            <br>
+            <input class="submit" type="submit" form="create-poll" value="Create Poll" onclick="getOptions()">
+
         </div>
-    </div>
 
 </main>
 </body>
@@ -83,6 +113,7 @@
         input.id="option"
         input.type="text"
 
+        document.getElementById("options").append(document.createElement("br"));
         document.getElementById("options").append(document.createElement("br"));
         document.getElementById("options").append(input);
     }

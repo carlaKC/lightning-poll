@@ -1,23 +1,51 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-    <link rel="stylesheet" type="text/css" href="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/css/bootstrap.min.css">
-    <meta charset="UTF-8">
+   <meta charset="UTF-8">
     <title>{{.title}}</title>
+
+    <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/css/bootstrap.min.css" integrity="sha384-ggOyR0iXCbMQv3Xipma34MD+dH/1fQ784/j6cY/iJTQUOhcWr7x9JvoRxT2MZw1T" crossorigin="anonymous">
+
+    <style>
+        body{
+            vertical-align: middle;
+            position: relative;
+            text-align: center;
+            padding-top: 80px;
+            padding-bottom: 80px;
+            padding-left: 250px;
+            padding-right: 250px;
+        }
+
+        .submit{
+            background: #FFEBAC;
+            border: #FFEBAC;
+            padding: 10px;
+            min-width: 150px;
+            height: 54px;
+            padding: 0 30px;
+            border-radius: 70px;
+            font-size: 14px;
+            line-height: 54px;
+            font-weight: 700;
+            text-transform: uppercase;
+            -webkit-transition-duration: 500ms;
+            transition-duration: 500ms;
+        }
+    </style>
 </head>
 <body>
 <h1>{{.poll.Question}}</h1>
 {{ if .poll.Options}}
-    <ul>
     {{range .poll.Options}}
-        <li id="{{.ID}}">{{.Value}}<form action="/vote" method="POST">
+        <p>{{.Value}}</p>
+        <form action="/vote" method="POST">
                 <input type="hidden" name="poll_str" id="poll_str" value="{{$.poll.Question}}">
                 <input type="hidden" name="opt_str" id="opt_str" value="{{.Value}}">
                 <input type="hidden" name="id" id="id" value="{{.ID}}">
                 <input type="hidden" name="poll_id" id="poll_id" value="{{$.poll.ID}}">
-                <input class="text-small-uppercase" id="submit" type="submit" value="Vote">
+                <input class="submit" id="submit" type="submit" value="Vote">
             </form>
-        </li>
         <br>
     {{end}}
     </ul>

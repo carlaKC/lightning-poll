@@ -1,15 +1,46 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-    <link rel="stylesheet" type="text/css" href="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/css/bootstrap.min.css">
     <meta charset="UTF-8">
     <title>{{.title}}</title>
+
+    <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/css/bootstrap.min.css" integrity="sha384-ggOyR0iXCbMQv3Xipma34MD+dH/1fQ784/j6cY/iJTQUOhcWr7x9JvoRxT2MZw1T" crossorigin="anonymous">
+
+    <style>
+        body{
+            vertical-align: middle;
+            position: relative;
+            text-align: center;
+            padding-top: 80px;
+            padding-bottom: 80px;
+            padding-left: 250px;
+            padding-right: 250px;
+        }
+
+        button{
+            background: #FFEBAC;
+            border: #FFEBAC;
+            padding: 10px;
+            min-width: 150px;
+            height: 54px;
+            padding: 0 30px;
+            border-radius: 70px;
+            font-size: 14px;
+            line-height: 54px;
+            font-weight: 700;
+            text-transform: uppercase;
+            -webkit-transition-duration: 500ms;
+            transition-duration: 500ms;
+        }
+    </style>
 </head>
 <body>
 <h1>Vote for: {{.poll.Question}}</h1>
 <img src=" https://api.qrserver.com/v1/create-qr-code/?data=lightning:{{.vote.PayReq}}&size=300x300">
 <br>
+<br>git
 <input type="text" value="{{.vote.PayReq}}" id="pay_req" disabled>
+<br>
 <button onclick="copyToClipboard()">Copy</button>
 </body>
 </html>

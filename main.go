@@ -20,8 +20,6 @@ func main() {
 	// Set the router as the default one provided by Gin
 	router = gin.Default()
 
-	// Process the templates at the start so that they don't have to be loaded
-	// from the disk again. This makes serving HTML pages very fast.
 	router.LoadHTMLGlob("/Users/carla/personal/src/lightning-poll/templates/*")
 
 	dbc, err := db.Connect()

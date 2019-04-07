@@ -1,23 +1,57 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-    <link rel="stylesheet" type="text/css" href="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/css/bootstrap.min.css">
     <meta charset="UTF-8">
     <title>{{.title}}</title>
+
+    <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/css/bootstrap.min.css" integrity="sha384-ggOyR0iXCbMQv3Xipma34MD+dH/1fQ784/j6cY/iJTQUOhcWr7x9JvoRxT2MZw1T" crossorigin="anonymous">
+
+    <style>
+        body{
+            vertical-align: middle;
+            position: relative;
+            text-align: center;
+            padding-top: 80px;
+            padding-bottom: 80px;
+            padding-left: 250px;
+            padding-right: 250px;
+        }
+
+        button{
+            background: #FFEBAC;
+            border: #FFEBAC;
+            padding: 10px;
+            min-width: 150px;
+            height: 54px;
+            padding: 0 30px;
+            border-radius: 70px;
+            font-size: 14px;
+            line-height: 54px;
+            font-weight: 700;
+            text-transform: uppercase;
+            -webkit-transition-duration: 500ms;
+            transition-duration: 500ms;
+        }
+    </style>
 </head>
+
 <body>
-<h1 class="text-headline">Welcome to Lightning Poll</h1>
-<br>
-<a href="/create"><button>Create Poll</button></a>
-<br>
-<br>
-{{ if .polls}}
-    <h2>Existing Polls</h2>
-    <ul>
-        {{ range .polls}}
-            <li><a href="/view/{{.ID}}">{{.Question}}</a></li>
+    <div class="center-element">
+        <h1 class="text-headline">⚡ Welcome to Lightning Poll ⚡</h1>
+        <br>
+        <a href="/create" ><button class="create-button">Create Poll</button></a>
+        <br>
+        <br>
+        {{ if .polls}}
+            <h2>Existing Polls</h2>
+            <ul>
+                {{ range .polls}}
+                    <li><a href="/view/{{.ID}}">{{.Question}}</a></li>
+                {{end}}
+            </ul>
         {{end}}
-    </ul>
-{{end}}
+    </div>
+
 </body>
+
 </html>
