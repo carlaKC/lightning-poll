@@ -27,7 +27,7 @@ var (
 		return getExtreme(votes, optionID, func(challenge, existing int64) bool { return challenge > existing })
 	}
 	repayMinimum = func(votes map[int64]int64, optionID int64) bool {
-		return getExtreme(votes, optionID, func(challenge, existing int64) bool { return challenge < existing })
+		return !repayMaximum(votes, optionID)
 	}
 )
 
@@ -93,7 +93,7 @@ var allSchemes = []RepayDetails{
 	{
 		ID:          RepaySchemeMinority,
 		Name:        "Repay Minority",
-		Description: "Repay voters who vote for the least popular option",
+		Description: "Repay voters who do not vote for the most popular option",
 	},
 	{
 		ID:          RepaySchemeAll,

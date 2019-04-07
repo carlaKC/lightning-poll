@@ -68,22 +68,20 @@ func TestGetVotes(t *testing.T) {
 	_, err = votes.Create(ctx, b, testPollID, testOptionID2, testSats, testExpiry, testNote)
 	assert.NoError(t, err)
 
-	v, err := votes.GetResults(ctx, b, testPollID, false)
+	v, err := votes.GetResults(ctx, b, testPollID)
 	assert.NoError(t, err)
 	assert.Equal(t, v[testOptionID], int64(2))
 	assert.Equal(t, v[testOptionID2], int64(1))
 
-	_, err = votes.GetResults(ctx, b, testPollID, true)
+	_, err = votes.GetResults(ctx, b, testPollID)
 	assert.NoError(t, err)
 
 	err = votes_db.UpdateStatus(ctx, b.GetDB(), id1, types.VoteStatusPaid, types.VoteStatusReturned)
 	assert.NoError(t, err)
 	err = votes_db.UpdateStatus(ctx, b.GetDB(), id2, types.VoteStatusPaid, types.VoteStatusReturned)
 	assert.NoError(t, err)
-	err = votes_db.UpdateStatus(ctx, b.GetDB(), id3, types.VoteStatusPaid, types.VoteStatusSettled)
-	assert.NoError(t, err)
 
-	v, err = votes.GetResults(ctx, b, testPollID, true)
+	v, err = votes.GetResults(ctx, b, testPollID)
 	assert.NoError(t, err)
 	assert.Equal(t, v[testOptionID], int64(2))
 	assert.Equal(t, v[testOptionID2], int64(1))

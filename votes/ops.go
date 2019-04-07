@@ -97,20 +97,13 @@ func subscribeIndividualInvoice(ctx context.Context, b Backends, id int64, payHa
 
 // GetResults returns a map of options IDs to vote counts.
 // Note that only paid votes are included.
-func GetResults(ctx context.Context, b Backends, pollID int64, isReleased bool) (map[int64]int64, error) {
+func GetResults(ctx context.Context, b Backends, pollID int64) (map[int64]int64, error) {
 	v := make(map[int64]int64)
 
-	var votes []*votes_db.DBVote
-	var err error
-	if !isReleased {
-		votes, err = votes_db.ListByPollAndStatus(ctx, b.GetDB(), pollID, types.VoteStatusPaid)
-	} else {
-		votes, err = getClosedPollVotes(ctx, b, pollID)
-	}
+	votes, err := getVotes(ctx, b, pollID)
 	if err != nil {
 		return v, err
 	}
-
 	for _, vote := range votes {
 		v[vote.OptionID] = v[vote.OptionID] + 1
 	}
@@ -118,11 +111,17 @@ func GetResults(ctx context.Context, b Backends, pollID int64, isReleased bool) 
 	return v, nil
 }
 
-func getClosedPollVotes(ctx context.Context, b Backends, pollID int64) ([]*votes_db.DBVote, error) {
+func getVotes(ctx context.Context, b Backends, pollID int64) ([]*votes_db.DBVote, error) {
+	votes, err := votes_db.ListByPollAndStatus(ctx, b.GetDB(), pollID, types.VoteStatusPaid)
+	if err != nil {
+		return nil, err
+	}
+
 	returned, err := votes_db.ListByPollAndStatus(ctx, b.GetDB(), pollID, types.VoteStatusReturned)
 	if err != nil {
 		return nil, err
 	}
+	returned = append(returned, votes...)
 
 	settled, err := votes_db.ListByPollAndStatus(ctx, b.GetDB(), pollID, types.VoteStatusSettled)
 	if err != nil {
@@ -153,7 +152,7 @@ func GetVotes(ctx context.Context, b Backends, pollID int64) ([]*Vote, error) {
 }
 
 func ReleaseVotesForPoll(ctx context.Context, b Backends, pollID int64, shouldRepay ext_types.RepaySchemeFunc) (int64, error) {
-	results, err := GetResults(ctx, b, pollID, false)
+	results, err := GetResults(ctx, b, pollID)
 	if err != nil {
 		return 0, err
 	}

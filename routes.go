@@ -134,7 +134,7 @@ func (e *Env) viewPollResults(c *gin.Context) {
 		c.AbortWithError(http.StatusInternalServerError, err)
 	}
 
-	results, err := votes.GetResults(c.Request.Context(), e, pollID, time.Now().After(poll.ClosesAt))
+	results, err := votes.GetResults(c.Request.Context(), e, pollID)
 	if err != nil {
 		c.AbortWithError(http.StatusInternalServerError, err)
 	}
