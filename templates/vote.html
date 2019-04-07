@@ -42,6 +42,11 @@
 <input type="text" value="{{.vote.PayReq}}" id="pay_req" disabled>
 <br>
 <button onclick="copyToClipboard()">Copy</button>
+<br>
+<br>
+<form action="/results/{{.poll.ID}}" method="GET">
+    <button class="submit">See Results</button>
+</form>
 </body>
 </html>
 
