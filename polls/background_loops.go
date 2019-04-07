@@ -63,6 +63,12 @@ func closePoll(ctx context.Context, b Backends, poll *poll_db.DBPoll) error {
 		return err
 	}
 
+	// the poll creator does not need to be paid out.
+	if amount == 0 {
+		return poll_db.UpdateStatus(ctx, b.GetDB(), poll.ID, types.PollStatusReleased,
+			types.PollStatusPaidOut)
+	}
+
 	// update to paying out to prevent double sending if sync send payment fails
 	if err := poll_db.UpdateStatus(ctx, b.GetDB(), poll.ID, types.PollStatusReleased,
 		types.PollStatusPayingOut); err != nil {
