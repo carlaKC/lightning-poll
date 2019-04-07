@@ -20,7 +20,7 @@ type row interface {
 func Create(ctx context.Context, dbc *sql.DB, question, payoutInvoice string,
 	repayScheme ext_types.RepayScheme, expirySeconds, voteSats, userID int64) (int64, error) {
 	id := rand.Int63()
-	expiresAt := time.Now().Add(time.Second * time.Duration(expirySeconds) * -1)
+	expiresAt := time.Now().Add(time.Second * time.Duration(expirySeconds) * 1)
 
 	r, err := dbc.ExecContext(ctx, "insert into polls set id=?, status=?, "+
 		"created_at=now(), expires_at=?, question=?, expiry_seconds=?, repay_scheme=?, "+

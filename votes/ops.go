@@ -21,22 +21,37 @@ type Backends interface {
 
 // Create initiates the process of voting for an option. It queries LND for
 // an invoice, saved it in the votes DB and returns it to the user.
-func Create(ctx context.Context, b Backends, pollID, optionID, sats, expiry int64) (int64, string, error) {
+func Create(ctx context.Context, b Backends, pollID, optionID, sats, expiry int64) (int64, error) {
 	resp, err := b.GetLND().AddHoldInvoice(ctx, sats, expiry, fmt.Sprintf("poll: %v, option: %v", pollID, optionID))
 	if err != nil {
-		return 0, "", err
+		return 0, err
 	}
 
 	id, err := votes_db.Create(ctx, b.GetDB(), pollID, optionID, expiry,
 		resp.PayReq, resp.PayHash, resp.Preimage)
 	if err != nil {
-		return 0, "", err
+		return 0, err
 	}
 
 	log.Printf("votes/ops: Created vote: %v", id)
 	go subscribeIndividualInvoice(ctx, b, id, resp.PayHash)
 
-	return id, resp.PayReq, nil
+	return id, nil
+}
+
+func Lookup(ctx context.Context, b Backends, id int64) (*Vote, error) {
+	vote, err := votes_db.Lookup(ctx, b.GetDB(), id)
+	if err != nil {
+		return nil, err
+	}
+
+	return &Vote{
+		ID:       vote.ID,
+		PollID:   vote.PollID,
+		OptionID: vote.OptionID,
+		Amount:   vote.SettleAmount,
+		PayReq:   vote.PayReq,
+	}, nil
 }
 
 func subscribeIndividualInvoice(ctx context.Context, b Backends, id int64, payHash string) {

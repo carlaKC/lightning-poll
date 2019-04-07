@@ -109,6 +109,15 @@ func ListExpired(ctx context.Context, dbc *sql.DB) ([]*DBVote, error) {
 		"and status=?", types.VoteStatusCreated)
 }
 
+func Lookup(ctx context.Context, dbc *sql.DB, id int64) (*DBVote, error) {
+	row := dbc.QueryRowContext(ctx, "select "+cols+" from votes where id=?", id)
+	vote, err := scan(row)
+	if err != nil {
+		return nil, err
+	}
+	return &vote, nil
+}
+
 func LookupByHash(ctx context.Context, dbc *sql.DB, paymentHash string) (*DBVote, error) {
 	row := dbc.QueryRowContext(ctx, "select "+cols+" from votes where payment_hash=?", paymentHash)
 	vote, err := scan(row)
