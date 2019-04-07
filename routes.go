@@ -112,6 +112,11 @@ func (e *Env) viewVotePage(c *gin.Context) {
 	)
 }
 
+type result struct {
+	Value string
+	Count int64
+}
+
 func (e *Env) viewPollResults(c *gin.Context) {
 	pollID := getInt(c, "id")
 
@@ -120,17 +125,31 @@ func (e *Env) viewPollResults(c *gin.Context) {
 		c.AbortWithError(http.StatusInternalServerError, err)
 	}
 
-	results, err := votes.GetResults(c.Request.Context(), e, pollID)
+	results, err := votes.GetResults(c.Request.Context(), e, pollID, time.Now().After(poll.ClosesAt))
 	if err != nil {
 		c.AbortWithError(http.StatusInternalServerError, err)
+	}
+
+	var xScale []string
+	var yScale []int64
+	for _, r := range poll.Options {
+		voteCount, ok := results[r.ID]
+		if !ok {
+			continue
+		}
+
+		xScale = append(xScale, r.Value)
+		yScale = append(yScale, voteCount)
 	}
 
 	c.HTML(
 		http.StatusOK,
 		"results.html",
 		gin.H{
-			"title": "Lightning Poll - View Poll Results",
-			"poll":  poll,
+			"title":  "Lightning Poll - View Poll Results",
+			"poll":   poll,
+			"xScale": xScale,
+			"yScale": yScale,
 		},
 	)
 }

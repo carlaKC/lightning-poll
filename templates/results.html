@@ -32,20 +32,29 @@
             -webkit-transition-duration: 500ms;
             transition-duration: 500ms;
         }
+
+        #myChart-wrapper{
+            margin:auto;
+        }
+        .zc-ref {
+            display: none;
+        }
     </style>
 </head>
 <body>
 <h1>{{.poll.Question}}</h1>
-{{ if .poll.Options}}
+{{ if .xScale}}
+    <div id='myChart'><a class="zc-ref" href="https://www.zingchart.com/">Powered by ZingChart</a></div>
+{{else}}
     {{range .poll.Options}}
-        <p>{{.Value}}</p>
-        <br>
-    {{end}}
-    </ul>
+        <p>{{.Value}}: 0</p>
+ {{ end}}
 {{end}}
+
 
 <p>Vote Cost: {{.poll.Cost}} satoshis</p>
 <p>Closes At: {{.poll.ClosesAt}}</p>
+
 
 <form action="/view/{{.poll.ID}}" method="GET">
     <button class="submit">Back</button>
@@ -53,3 +62,90 @@
 
 </body>
 </html>
+
+
+<script src= "https://cdn.zingchart.com/zingchart.min.js"></script>
+<script> zingchart.MODULESDIR = "https://cdn.zingchart.com/modules/";
+    ZC.LICENSE = ["569d52cefae586f634c54f86dc99e6a9","ee6b7db5b51705a13dc2339db3edaf6d"];</script>
+
+<script>
+    var xScale = {{.xScale}};
+    var yScale = {{.yScale}};
+    console.log(xScale)
+    console.log(yScale)
+    function populate(xVal, yVal){
+        xScale.push(xVal)
+        yScale.push(yVal)
+    }
+
+    var myConfig ={
+        "type":"hbar",
+        "font-family":"Arial",
+        "title":{
+            "font-family":"Arial",
+            "background-color":"none",
+            "font-color":"#A4A4A4",
+            "font-size":"18px"
+        },
+        "plot":{
+            "bars-overlap":"100%",
+            "borderRadius":8,
+            "hover-state":{
+                "visible":false
+            },
+            "animation": {
+                "delay": 300,
+                "effect": 3,
+                "speed": "500",
+                "method": "0",
+                "sequence": "3"
+            }
+        },
+        "scale-x":{
+            "line-color":"none",
+            "values":xScale,
+            "tick":{
+                "visible":false
+            },
+            "guide":{
+                "visible":false
+            },
+            "item":{
+                "font-size":"14px",
+                "padding-right":"20px",
+                "auto-align":true,
+            }
+        },
+        "scale-y":{
+            "visible":false,
+            "guide":{
+                "visible":false
+            }
+        },
+        "series":[
+            {
+                "values":yScale,
+                "bar-width":"32px",
+                "max-trackers":0,
+                "background-color":"#FCCC65",
+                "value-box":{
+                    "placement":"top-out",
+                    "text":"%v",
+                    "decimals":0,
+                    "font-color":"#A4A4A4",
+                    "font-size":"14px",
+                    "alpha":0.6
+                },
+
+            }
+        ]
+    };
+
+    console.log(myConfig)
+
+    zingchart.render({
+        id : 'myChart',
+        data : myConfig,
+        width: 725
+    });
+</script>
