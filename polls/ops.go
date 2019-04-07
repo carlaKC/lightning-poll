@@ -77,6 +77,8 @@ func LookupPoll(ctx context.Context, b Backends, id int64) (*Poll, error) {
 	poll := &Poll{
 		ID:       dbPoll.ID,
 		Question: dbPoll.Question,
+		Cost:     dbPoll.VoteSats,
+		ClosesAt: dbPoll.ExpiresAt,
 	}
 
 	options, err := options_db.ListByPoll(ctx, b.GetDB(), dbPoll.ID)

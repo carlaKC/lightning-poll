@@ -1,10 +1,21 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
+    <link rel="stylesheet" type="text/css" href="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/css/bootstrap.min.css">
     <meta charset="UTF-8">
-    <title>Lightning Poll - View</title>
+    <title>{{.title}}</title>
 </head>
 <body>
-<p>View poll by ID</p>
+<h1>{{.poll.Question}}</h1>
+{{ if .poll.Options}}
+    <ul>
+    {{range .poll.Options}}
+        <li id="{{.ID}}">{{.Value}}</li>
+    {{end}}
+    </ul>
+{{end}}
+
+<p>Vote Cost: {{.poll.Cost}} satoshis</p>
+<p>Closes At: {{.poll.ClosesAt}}</p>
 </body>
 </html>

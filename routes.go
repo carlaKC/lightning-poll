@@ -1,8 +1,11 @@
 package main
 
 import (
+	"context"
 	"database/sql"
+	"lightning-poll/polls"
 	"net/http"
+	"strconv"
 
 	"github.com/gin-gonic/gin"
 
@@ -25,17 +28,23 @@ func (e Env) GetLND() lnd.Client {
 func initializeRoutes(e Env) {
 	router.GET("/", e.showHomePage)
 	router.GET("/create", e.createPollPage)
-	router.GET("/view", e.viewPollPage)
+	router.GET("/view/:id", e.viewPollPage)
 
 	router.POST("/create", e.createPollPost)
 }
 
 func (e *Env) showHomePage(c *gin.Context) {
+	polls, err := polls.ListActivePolls(context.Background(), e)
+	if err != nil {
+		c.AbortWithError(http.StatusInternalServerError, err)
+	}
+
 	c.HTML(
 		http.StatusOK,
 		"home.html",
 		gin.H{
-			"title": "Home Page",
+			"title": "Lightning Poll - Home",
+			"polls": polls,
 		},
 	)
 
@@ -46,17 +55,32 @@ func (e *Env) createPollPage(c *gin.Context) {
 		http.StatusOK,
 		"create.html",
 		gin.H{
-			"title": "Create Poll",
+			"title": "Lightning Poll - Create",
 		},
 	)
 }
 
 func (e *Env) viewPollPage(c *gin.Context) {
+	idStr, ok := c.Params.Get("id")
+	if !ok {
+		c.AbortWithStatus(http.StatusBadRequest)
+	}
+
+	id, err := strconv.ParseInt(idStr, 10, 64)
+	if err != nil {
+		c.AbortWithError(http.StatusBadRequest, err)
+	}
+	poll, err := polls.LookupPoll(context.Background(), e, id)
+	if err != nil {
+		c.AbortWithError(http.StatusInternalServerError, err)
+	}
+
 	c.HTML(
 		http.StatusOK,
 		"view.html",
 		gin.H{
-			"title": "Create Poll",
+			"title": "Lightning Poll -View Poll",
+			"poll":  poll,
 		},
 	)
 }

@@ -1,15 +1,23 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
+    <link rel="stylesheet" type="text/css" href="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/css/bootstrap.min.css">
     <meta charset="UTF-8">
-    <title>Lightning Poll</title>
+    <title>{{.title}}</title>
 </head>
 <body>
-<h1>Welcome to Lightning Poll</h1>
-<button>Create Poll</button>
-<h2>Existing Polls</h2>
-<ul>
-    <li>List items here</li>
-</ul>
+<h1 class="text-headline">Welcome to Lightning Poll</h1>
+<br>
+<a href="/create"><button>Create Poll</button></a>
+<br>
+<br>
+{{ if .polls}}
+    <h2>Existing Polls</h2>
+    <ul>
+        {{ range .polls}}
+            <li><a href="/view/{{.ID}}">{{.Question}}</a></li>
+        {{end}}
+    </ul>
+{{end}}
 </body>
 </html>

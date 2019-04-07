@@ -1,10 +1,96 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
+    <link href="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-ggOyR0iXCbMQv3Xipma34MD+dH/1fQ784/j6cY/iJTQUOhcWr7x9JvoRxT2MZw1T" crossorigin="anonymous">
     <meta charset="UTF-8">
     <title>Lightning Poll - Create</title>
 </head>
 <body>
- <p>Create poll form here</p>
+<main>
+    <div class="row">
+        <div class ="col-md-12">
+            <div class="headline">
+                <h2 class="text-headline">Create Lightning Poll</h2>
+                <h2 class="text-subheadline">Put your satoshis where your mouth is</h2>
+            </div>
+        </div>
+    </div>
+
+    <div class="row">
+        <div class ="col-md-6">
+
+            <form>
+                <span>
+      <label for="question" class="text-small-uppercase">Question</label>
+      <input class="text-body" id="question" name="question" type="text" required>
+    </span>
+                <br>
+                <br>
+                <span>
+      <label for="satoshis" class="text-small-uppercase">Satoshi per Vote</label>
+      <input class="text-body" id="satoshis" name="satoshis" type="number" required>
+    </span>
+                <br>
+                <br>
+                <span>
+      <label for="invoice" class="text-small-uppercase">Payout Invoice</label>
+      <input class="text-body" id="invoice" name="invoice" type="text" required>
+    </span>
+                <br>
+                <br>
+                <span>
+        <input type="hidden" name="added[]" id="added[]" value="">
+    </span>
+                <br>
+                <br>
+                <input class="text-small-uppercase" id="submit" type="submit" value="Create Poll" onclick="getOptions()">
+
+            </form>
+
+        </div>
+
+        <div class ="col-md-6">
+            <div id="options">
+                <input class="text-body" class="option" id="option" name="option" type="text">
+            </div>
+            <br>
+            <button class="text-small-uppercase" id="addOption" onclick="addOptionField()">Add Option</button>
+        </div>
+    </div>
+
+</main>
 </body>
 </html>
+
+<script>
+    function addOptionField() {
+        var input=document.createElement("input")
+        input.className="text-body"
+        input.id="option"
+        input.type="text"
+
+        document.getElementById("options").append(document.createElement("br"));
+        document.getElementById("options").append(input);
+    }
+
+    function getOptions(){
+        console.log("getOptions")
+        var added = [];
+        var add = document.getElementById("options").childNodes
+        for (i = 0; i < add.length; i++) {
+            console.log(add[i].type)
+            if (add[i].type == 'text'){
+                console.log(add[i].value)
+                added.push(add[i].value)
+            }
+        }
+        console.log(added)
+        debugger;
+        document.getElementById("added[]").setAttribute("value", added)
+    }
+
+</script>
+
+<script src="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/js/bootstrap.min.js" integrity="sha384-JjSmVgyd0p3pXB1rRibZUAYoIIy6OrQ6VrjIEaFf/nJGzIxFDsf4x0xIM+B07jRM" crossorigin="anonymous"></script>
+
+
