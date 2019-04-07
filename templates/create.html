@@ -19,38 +19,46 @@
     <div class="row">
         <div class ="col-md-6">
 
-            <form>
+            <form action="/create" method="POST">
                 <span>
-      <label for="question" class="text-small-uppercase">Question</label>
-      <input class="text-body" id="question" name="question" type="text" required>
-    </span>
-                <br>
-                <br>
-                <span>
-      <label for="satoshis" class="text-small-uppercase">Satoshi per Vote</label>
-      <input class="text-body" id="satoshis" name="satoshis" type="number" required>
-    </span>
-                <br>
-                <br>
-                <span>
-      <label for="expiry" class="text-small-uppercase">Expiry(hours)</label>
-      <input class="text-body" id="expiry" name="expiry" type="number" required>
-    </span>
-                <br>
-                <br>
-                <span>
-      <label for="invoice" class="text-small-uppercase">Payout Invoice</label>
-      <input class="text-body" id="invoice" name="invoice" type="text" required>
-    </span>
-                <br>
-                <br>
-                <span>
-        <input type="hidden" name="added[]" id="added[]" value="">
-    </span>
-                <br>
-                <br>
-                <input class="text-small-uppercase" id="submit" type="submit" value="Create Poll" onclick="getOptions()">
+                  <label for="question" class="text-small-uppercase">Question</label>
+                  <input class="text-body" id="question" name="question" type="text" required>
+                </span>
 
+                <br>
+                <br>
+
+                <span>
+                  <label for="satoshis" class="text-small-uppercase">Satoshi per Vote</label>
+                  <input class="text-body" id="satoshis" name="satoshis" type="number" required>
+                </span>
+
+                <br>
+                <br>
+
+                <span>
+                  <label for="expiry" class="text-small-uppercase">Expiry(hours)</label>
+                  <input class="text-body" id="expiry" name="expiry" type="number" required>
+                </span>
+
+                <br>
+                <br>
+                <span>
+                  <label for="invoice" class="text-small-uppercase">Payout Invoice</label>
+                    <input class="text-body" id="invoice" name="invoice" type="text" required>
+                </span>
+
+                <br>
+                <br>
+
+                <span>
+                    <input type="hidden" name="added[]" id="added[]" value="">
+                 </span>
+
+                <br>
+                <br>
+
+                <input class="text-small-uppercase" id="submit" type="submit" value="Create Poll" onclick="getOptions()">
             </form>
 
         </div>

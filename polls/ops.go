@@ -39,6 +39,9 @@ func CreatePoll(ctx context.Context, b Backends, question, payReq string, repayS
 	log.Printf("polls/ops: Created poll: %v", id)
 
 	for _, o := range options {
+		if o == "" {
+			continue
+		}
 		optID, err := options_db.Create(ctx, b.GetDB(), id, o)
 		if err != nil {
 			return 0, err

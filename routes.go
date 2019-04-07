@@ -3,14 +3,16 @@ package main
 import (
 	"context"
 	"database/sql"
-	"errors"
+	"fmt"
 	"net/http"
 	"strconv"
+	"strings"
 
 	"github.com/gin-gonic/gin"
 
 	"lightning-poll/lnd"
 	"lightning-poll/polls"
+	"lightning-poll/types"
 )
 
 type Env struct {
@@ -62,9 +64,13 @@ func (e *Env) createPollPage(c *gin.Context) {
 }
 
 func (e *Env) viewPollPage(c *gin.Context) {
-	id, err := getInt(c, "id")
+	idStr, ok := c.Params.Get("id")
+	if !ok {
+		c.AbortWithStatus(http.StatusBadRequest)
+	}
+	id, err := strconv.ParseInt(idStr, 10, 64)
 	if err != nil {
-		c.AbortWithError(http.StatusBadRequest, err)
+		c.AbortWithError(http.StatusInternalServerError, err)
 	}
 
 	poll, err := polls.LookupPoll(context.Background(), e, id)
@@ -82,46 +88,30 @@ func (e *Env) viewPollPage(c *gin.Context) {
 	)
 }
 
-func getInt(c *gin.Context, field string) (int64, error) {
-	str, ok := c.Params.Get(field)
-	if !ok {
-		return 0, errors.New("Field name not set")
-	}
-
-	return strconv.ParseInt(str, 10, 64)
-}
-
 func (e *Env) createPollPost(c *gin.Context) {
-	question, ok := c.Params.Get("question")
-	if !ok {
-		c.AbortWithStatus(http.StatusBadRequest)
-	}
+	question := c.PostForm("question")
+	payReq := c.PostForm("invoice")
 
-	payReq, ok := c.Params.Get("invoice")
-	if !ok {
-		c.AbortWithStatus(http.StatusBadRequest)
-	}
-
-	sats, err := getInt(c, "satohis")
+	sats, err := strconv.ParseInt(c.PostForm("satoshis"), 10, 64)
 	if err != nil {
-		c.AbortWithError(http.StatusBadRequest, err)
+		c.AbortWithError(http.StatusInternalServerError, err)
 	}
 
-	expiry, err := getInt(c, "expiry")
+	expiry, err := strconv.ParseInt(c.PostForm("expiry"), 10, 64)
 	if err != nil {
-		c.AbortWithError(http.StatusBadRequest, err)
+		c.AbortWithError(http.StatusInternalServerError, err)
 	}
 	expirySeconds := expiry * 60 * 60 // hours to seconds
 
-	id, err := polls.CreatePoll(context.Background(), e, question, payReq, polls.RepaySchemeMajority, expirySeconds, sats, 0)
-	// TODO(carla): handle post
-	c.HTML(
-		http.StatusOK,
-		"view.html",
-		gin.H{
-			"title": "Create Poll",
-		},
-	)
-	c.Re
+	options := c.PostForm("added[]")
+
+	id, err := polls.CreatePoll(context.Background(), e, question, payReq,
+		types.RepaySchemeMajority, strings.Split(options, ","), expirySeconds, sats, 0)
+	if err != nil {
+		c.AbortWithError(http.StatusInternalServerError, err)
+	}
+
+	// TODO(carla): figure out non hacky redirect
+	c.Params = append(c.Params, gin.Param{Key: "id", Value: fmt.Sprintf("%v", id)})
 	e.viewPollPage(c)
 }

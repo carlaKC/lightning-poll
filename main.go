@@ -2,6 +2,8 @@ package main
 
 import (
 	"flag"
+	"lightning-poll/polls"
+	"lightning-poll/votes"
 	"log"
 
 	"github.com/gin-gonic/gin"
@@ -31,9 +33,13 @@ func main() {
 	if err != nil {
 		log.Fatalf("could not connect to LND: %v", err)
 	}
+	env := Env{db: dbc, lnd: lndCl}
+
+	votes.StartLoops(env)
+	polls.StartLoops(env)
 
 	// Initialize the routes
-	initializeRoutes(Env{db: dbc, lnd: lndCl})
+	initializeRoutes(env)
 
 	// Start serving the application
 	router.Run()

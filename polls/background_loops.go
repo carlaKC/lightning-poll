@@ -3,6 +3,7 @@ package polls
 import (
 	"fmt"
 	"log"
+	"time"
 
 	"golang.org/x/net/context"
 
@@ -11,7 +12,7 @@ import (
 	"lightning-poll/votes"
 )
 
-func Start(b Backends) {
+func StartLoops(b Backends) {
 	go closePollsForever(b)
 }
 
@@ -20,6 +21,7 @@ func closePollsForever(b Backends) {
 		if err := closePolls(b); err != nil {
 			log.Printf("polls/ops: closePollsForever error: %v", err)
 		}
+		time.Sleep(time.Minute * 1)
 	}
 }
 

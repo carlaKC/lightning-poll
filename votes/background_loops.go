@@ -10,7 +10,7 @@ import (
 	"lightning-poll/votes/internal/types"
 )
 
-func Start(b Backends) {
+func StartLoops(b Backends) {
 	go expireVotesForever(b)
 }
 
