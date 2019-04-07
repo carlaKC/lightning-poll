@@ -7,6 +7,20 @@
 </head>
 <body>
 <h1>Vote for: {{.poll.Question}}</h1>
-<p>Payment Request: {{.vote.PayReq}}</p>
+<img src=" https://api.qrserver.com/v1/create-qr-code/?data=lightning:{{.vote.PayReq}}&size=300x300">
+<br>
+<input type="text" value="{{.vote.PayReq}}" id="pay_req" disabled>
+<button onclick="copyToClipboard()">Copy</button>
 </body>
 </html>
+
+<script>
+    function copyToClipboard() {
+        var copyText = document.getElementById("pay_req");
+        copyText.disabled = false;
+        copyText.select();
+        document.execCommand("copy");
+        copyText.disabled = true;
+    }
+
+</script>
