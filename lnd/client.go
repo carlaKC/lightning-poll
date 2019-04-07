@@ -127,7 +127,13 @@ func (cl *client) LookupInvoice(ctx context.Context, paymentHash string) (*lnrpc
 
 func (cl *client) SubscribeInvoice(ctx context.Context, id int64, paymentHash string) (invoicesrpc.Invoices_SubscribeSingleInvoiceClient, error) {
 	log.Printf("lnd: SubscribeInvoice connecting for invoice: %v", id)
-	return cl.invoiceClient.SubscribeSingleInvoice(ctx, &lnrpc.PaymentHash{RHashStr: paymentHash})
+
+	hash, err := hex.DecodeString(paymentHash)
+	if err != nil {
+		return nil, err
+	}
+
+	return cl.invoiceClient.SubscribeSingleInvoice(ctx, &lnrpc.PaymentHash{RHashStr: paymentHash, RHash: hash})
 }
 
 func (cl *client) DecodePaymentRequest(ctx context.Context, request string) (*lnrpc.PayReq, error) {

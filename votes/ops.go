@@ -7,7 +7,8 @@ import (
 	"fmt"
 	"lightning-poll/lnd"
 	"log"
-	"time"
+
+	"github.com/lightningnetwork/lnd/lnrpc"
 
 	ext_types "lightning-poll/types"
 	votes_db "lightning-poll/votes/internal/db/votes"
@@ -34,7 +35,7 @@ func Create(ctx context.Context, b Backends, pollID, optionID, sats, expiry int6
 	}
 
 	log.Printf("votes/ops: Created vote: %v", id)
-	go subscribeIndividualInvoice(ctx, b, id, resp.PayHash)
+	go subscribeIndividualInvoice(context.Background(), b, id, resp.PayHash)
 
 	return id, nil
 }
@@ -81,7 +82,7 @@ func subscribeIndividualInvoice(ctx context.Context, b Backends, id int64, payHa
 			return
 		}
 
-		if inv.SettleIndex <= 0 {
+		if inv.State != lnrpc.Invoice_ACCEPTED {
 			log.Printf("votes/ops: settleInvoices stream received a non-settled invoice")
 			continue
 		}
@@ -90,7 +91,8 @@ func subscribeIndividualInvoice(ctx context.Context, b Backends, id int64, payHa
 			log.Printf("subscribeIndividualInvoice error:%v", err)
 			return
 		}
-		time.Sleep(time.Second * 30)
+		log.Printf("votes/ops: marked invoice %v as paid", id)
+		return
 	}
 }
 
