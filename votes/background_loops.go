@@ -6,6 +6,8 @@ import (
 	"log"
 	"time"
 
+	"github.com/lightningnetwork/lnd/lnrpc"
+
 	votes_db "lightning-poll/votes/internal/db/votes"
 	"lightning-poll/votes/internal/types"
 )
@@ -35,16 +37,17 @@ func expireVotes(ctx context.Context, b Backends) error {
 
 	for _, exp := range expired {
 		// if the invoice has been settled, update vote to paid
-		inv, err := b.GetLND().LookupInvoice(ctx, exp.PayReq)
+		inv, err := b.GetLND().LookupInvoice(ctx, exp.PayHash)
 		if err != nil {
 			return err
 		}
 
-		if inv.SettleIndex > 0 {
+		if inv.State == lnrpc.Invoice_ACCEPTED {
 			if err := markInvoicePaid(ctx, b, hex.EncodeToString(inv.RHash),
 				inv.AmtPaidSat, inv.SettleIndex); err != nil {
 				return err
 			}
+			continue
 		}
 
 		// if the invoice has not been paid, expire it
