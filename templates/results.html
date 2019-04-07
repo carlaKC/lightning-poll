@@ -1,7 +1,7 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-    <meta charset="UTF-8">
+   <meta charset="UTF-8">
     <title>{{.title}}</title>
 
     <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/css/bootstrap.min.css" integrity="sha384-ggOyR0iXCbMQv3Xipma34MD+dH/1fQ784/j6cY/iJTQUOhcWr7x9JvoRxT2MZw1T" crossorigin="anonymous">
@@ -17,7 +17,7 @@
             padding-right: 250px;
         }
 
-        button{
+        .submit{
             background: #FFEBAC;
             border: #FFEBAC;
             padding: 10px;
@@ -32,28 +32,24 @@
             -webkit-transition-duration: 500ms;
             transition-duration: 500ms;
         }
-
-        a{
-            color: black;
-        }
     </style>
 </head>
-
 <body>
-    <div class="center-element">
-        <h1 class="text-headline">⚡ Welcome to Lightning Poll ⚡</h1>
+<h1>{{.poll.Question}}</h1>
+{{ if .poll.Options}}
+    {{range .poll.Options}}
+        <p>{{.Value}}</p>
         <br>
-        <a href="/create" ><button class="create-button">Create Poll</button></a>
-        <br>
-        <br>
-        {{ if .polls}}
-            <h2>Existing Polls</h2>
-                {{ range .polls}}
-                    <p><a href="/view/{{.ID}}">{{.Question}}</a></p>
-                {{end}}
-        {{end}}
-    </div>
+    {{end}}
+    </ul>
+{{end}}
+
+<p>Vote Cost: {{.poll.Cost}} satoshis</p>
+<p>Closes At: {{.poll.ClosesAt}}</p>
+
+<form action="/view/{{.poll.ID}}" method="GET">
+    <button class="submit">Back</button>
+</form>
 
 </body>
-
 </html>

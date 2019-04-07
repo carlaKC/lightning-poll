@@ -34,6 +34,7 @@ func initializeRoutes(e Env) {
 	router.GET("/", e.showHomePage)
 	router.GET("/create", e.createPollPage)
 	router.GET("/view/:id", e.viewPollPage)
+	router.GET("/results/:id", e.viewPollResults)
 	router.GET("/vote/:id", e.viewVotePage)
 
 	router.POST("/create", e.createPollPost)
@@ -79,9 +80,10 @@ func (e *Env) viewPollPage(c *gin.Context) {
 		http.StatusOK,
 		"view.html",
 		gin.H{
-			"title": "Lightning Poll - View Poll",
-			"poll":  poll,
-			"unix":  int64(poll.ClosesAt.Unix()),
+			"title":   "Lightning Poll - View Poll",
+			"poll":    poll,
+			"is_open": time.Now().Before(poll.ClosesAt),
+			"unix":    int64(poll.ClosesAt.Unix()),
 		},
 	)
 }
@@ -106,6 +108,29 @@ func (e *Env) viewVotePage(c *gin.Context) {
 			"title": "Lightning Poll - View Vote",
 			"poll":  poll,
 			"vote":  vote,
+		},
+	)
+}
+
+func (e *Env) viewPollResults(c *gin.Context) {
+	pollID := getInt(c, "id")
+
+	poll, err := polls.LookupPoll(c.Request.Context(), e, pollID)
+	if err != nil {
+		c.AbortWithError(http.StatusInternalServerError, err)
+	}
+
+	results, err := votes.GetResults(c.Request.Context(), e, pollID)
+	if err != nil {
+		c.AbortWithError(http.StatusInternalServerError, err)
+	}
+
+	c.HTML(
+		http.StatusOK,
+		"results.html",
+		gin.H{
+			"title": "Lightning Poll - View Poll Results",
+			"poll":  poll,
 		},
 	)
 }

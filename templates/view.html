@@ -39,13 +39,15 @@
 {{ if .poll.Options}}
     {{range .poll.Options}}
         <p>{{.Value}}</p>
-        <form action="/vote" method="POST">
-                <input type="hidden" name="poll_str" id="poll_str" value="{{$.poll.Question}}">
-                <input type="hidden" name="opt_str" id="opt_str" value="{{.Value}}">
-                <input type="hidden" name="id" id="id" value="{{.ID}}">
-                <input type="hidden" name="poll_id" id="poll_id" value="{{$.poll.ID}}">
-                <input class="submit" id="submit" type="submit" value="Vote">
-            </form>
+        {{if $.is_open}}
+            <form action="/vote" method="POST">
+                    <input type="hidden" name="poll_str" id="poll_str" value="{{$.poll.Question}}">
+                    <input type="hidden" name="opt_str" id="opt_str" value="{{.Value}}">
+                    <input type="hidden" name="id" id="id" value="{{.ID}}">
+                    <input type="hidden" name="poll_id" id="poll_id" value="{{$.poll.ID}}">
+                    <input class="submit" id="submit" type="submit" value="Vote">
+                </form>
+        {{end}}
         <br>
     {{end}}
     </ul>
@@ -53,5 +55,10 @@
 
 <p>Vote Cost: {{.poll.Cost}} satoshis</p>
 <p>Closes At: {{.poll.ClosesAt}}</p>
+
+<form action="/results/{{.poll.ID}}" method="GET">
+    <button class="submit">See Results</button>
+</form>
+
 </body>
 </html>
