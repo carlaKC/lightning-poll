@@ -8,5 +8,8 @@ Poll creators can choose a refund strategy for polls they create, refunding the 
 # Install
 A [LND node](https://github.com/lightningnetwork/lnd/blob/master/docs/INSTALL.md) and [golang](https://golang.org/doc/install) installation are required to run lightning-poll. 
 
+
 `go install $GOPATH/lightning-poll`
+
+
 `$GOPATH/bin/lightning-poll --lnd_cert={lnd cert path} --lnd_address{lnd rpc server}` 
