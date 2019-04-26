@@ -13,8 +13,8 @@
             text-align: center;
             padding-top: 80px;
             padding-bottom: 80px;
-            padding-left: 250px;
-            padding-right: 250px;
+            padding-left: 150px;
+            padding-right: 150px;
         }
 
         .text-headline{
@@ -37,10 +37,9 @@
             transition-duration: 500ms;
         }
 
-        .option{
-
+        .text-body{
+            width: 50%;
         }
-
 
     </style>
 </head>
@@ -48,9 +47,9 @@
 <main>
 
 
-                <div class="headline">
-                    <h2 class="text-headline">Create Lightning Poll</h2>
-                </div>
+        <div class="headline">
+            <h2 class="text-headline">⚡ Create Lightning Poll ⚡</h2>
+        </div>
 
 
         <div class="form-inputs">
@@ -62,7 +61,7 @@
                     <br>
                     <br>
 
-                        <label for="satoshis" class="text-small-uppercase">Satoshi per Vote:</label>
+                        <label for="satoshis" class="text-small-uppercase">Satoshis per Vote:</label>
                         <br>
                         <input class="text-body" id="satoshis" name="satoshis" type="number" required>
 
@@ -75,13 +74,18 @@
 
                     <br>
                     <br>
-
                         <label for="invoice" class="text-small-uppercase">Payout Invoice:</label>
-                        <br>
+                    <p>Provide a <b>zero amount</b> invoice that has an expiry 24 hours > poll duration.</p>
                         <input class="text-body" id="invoice" name="invoice" type="text" required>
 
                         <input type="hidden" name="added[]" id="added[]" value="">
 
+                    <br>
+                    <br>
+
+                        <label for="email" class="text-small-uppercase">Email Address (optional):</label>
+                    <p>A backup contact email in case we cannot route your payment within 24 hours.</p>
+                    <input class="text-body" id="email" name="email" type="text">
                     <br>
                     <br>
 
