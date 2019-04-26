@@ -88,8 +88,8 @@
 
                     <label for="payout" class="text-small-uppercase">Refund strategy:</label>
                     <br>
-                    {{range .repayment}}
-                        <input type="radio" name="payout" value="{{.ID}}" required > {{.Name}}<br>
+                    {{range $key, $value := .repayment}}
+                        <input type="radio" name="payout" value="{{$key}}" required > {{$value.Name}}<br>
                     {{end}}
                     <input type="hidden" id="payout_id" name="payout_id" type="text" required>
 

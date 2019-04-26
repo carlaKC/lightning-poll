@@ -55,6 +55,7 @@
 
 <p>Vote Cost: {{.poll.Cost}} satoshis</p>
 <p>Closes At: {{.poll.ClosesAt}}</p>
+<p>{{.poll.Strategy.Name}} : {{.poll.Strategy.Description}}</p>
 
 <form action="/results/{{.poll.ID}}" method="GET">
     <button class="submit">See Results</button>

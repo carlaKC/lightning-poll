@@ -78,35 +78,35 @@ func (s RepayScheme) GetScheme() RepaySchemeFunc {
 	return scheme
 }
 
+func (s RepayScheme)GetDetails()RepayDetails{
+	return allSchemes[s]
+}
+
 type RepayDetails struct {
-	ID          RepayScheme
 	Name        string
 	Description string
 }
 
-var allSchemes = []RepayDetails{
-	{
-		ID:          RepaySchemeMajority,
+var allSchemes = map[RepayScheme]RepayDetails{
+	RepaySchemeMajority:{
 		Name:        "Repay Majority",
 		Description: "Repay voters who vote for the most popular option",
 	},
-	{
-		ID:          RepaySchemeMinority,
-		Name:        "Repay Minority",
+	RepaySchemeMinority:{
+		Name:        "Repay Non-Majority",
 		Description: "Repay voters who do not vote for the most popular option",
 	},
-	{
-		ID:          RepaySchemeAll,
+	RepaySchemeAll:{
 		Name:        "Repay Everybody",
 		Description: "Repay all voters",
 	},
-	{
-		ID:          RepaySchemeNone,
+	RepaySchemeNone:{
 		Name:        "Repay Nobody",
 		Description: "Repay no voters (bc broke or an asshole)",
 	},
 }
 
-func GetRepaySchemes() []RepayDetails {
+func GetRepaySchemes() map[RepayScheme]RepayDetails {
 	return allSchemes
 }
+

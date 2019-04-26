@@ -2,6 +2,8 @@ package polls
 
 import (
 	"time"
+
+	"lightning-poll/types"
 )
 
 type Poll struct {
@@ -10,6 +12,7 @@ type Poll struct {
 	Options  []*Option
 	Cost     int64
 	ClosesAt time.Time
+	Strategy types.RepayDetails
 }
 
 type Option struct {
