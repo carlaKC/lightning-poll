@@ -3,7 +3,6 @@ package polls
 import (
 	"context"
 	"database/sql"
-	"log"
 	"math/rand"
 	"time"
 
@@ -112,8 +111,7 @@ func UpdateStatus(ctx context.Context, dbc *sql.DB, id int64, fromStatus, toStat
 	if n != 1 {
 		return db.ErrUnexpectedRowCount
 	}
-	//TODO(carla): remove this once debugging is done
-	log.Printf("polls: UpdateStatus poll: %v updated %v -> %v", id, fromStatus, toStatus)
+
 	return nil
 }
 

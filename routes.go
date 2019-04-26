@@ -39,7 +39,6 @@ func initializeRoutes(e Env) {
 
 	router.POST("/create", e.createPollPost)
 	router.POST("/vote", e.createVotePost)
-	router.POST("/close", e.forceClosePoll)
 }
 
 func (e *Env) showHomePage(c *gin.Context) {
@@ -222,19 +221,6 @@ func (e *Env) createVotePost(c *gin.Context) {
 		c.AbortWithError(http.StatusInternalServerError, err)
 	}
 
-	//TODO(carla): stop being hacky
 	c.Params = append(c.Params, gin.Param{Key: "id", Value: fmt.Sprintf("%v", id)})
 	e.viewVotePage(c)
-}
-
-func (e *Env) forceClosePoll(c *gin.Context) {
-	pollID := getPostInt(c, "id")
-
-	if err := polls.FoceClosePoll(c.Request.Context(), e, pollID); err != nil {
-		c.AbortWithError(http.StatusInternalServerError, err)
-	}
-
-	//TODO(carla): stop being hacky
-	c.Params = append(c.Params, gin.Param{Key: "id", Value: fmt.Sprintf("%v", pollID)})
-	e.viewPollResults(c)
 }
