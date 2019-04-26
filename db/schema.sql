@@ -8,7 +8,7 @@ create table polls(
   repay_scheme tinyint not null,
   vote_sats bigint not null,
   payout_invoice text,
-  user_id bigint,
+  email varchar(255),
 
   primary key(id)
 );

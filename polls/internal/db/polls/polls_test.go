@@ -28,13 +28,13 @@ func setup(t *testing.T) (context.Context, *sql.DB) {
 
 func TestCreate(t *testing.T) {
 	ctx, dbc := setup(t)
-	_, err := polls.Create(ctx, dbc, testQuestion, testInvoice, testRepay, testExpiry, testVoteSats, testUser)
+	_, err := polls.Create(ctx, dbc, testQuestion, testInvoice, "",  testRepay, testExpiry, testVoteSats)
 	assert.NoError(t, err)
 }
 
 func TestLookup(t *testing.T) {
 	ctx, dbc := setup(t)
-	id, err := polls.Create(ctx, dbc, testQuestion, testInvoice, testRepay, testExpiry, testVoteSats, testUser)
+	id, err := polls.Create(ctx, dbc, testQuestion, testInvoice, "",  testRepay, testExpiry, testVoteSats)
 	assert.NoError(t, err)
 
 	_, err = polls.Lookup(ctx, dbc, id)
@@ -43,7 +43,7 @@ func TestLookup(t *testing.T) {
 
 func TestListByStatus(t *testing.T) {
 	ctx, dbc := setup(t)
-	_, err := polls.Create(ctx, dbc, testQuestion, testInvoice, testRepay, testExpiry, testVoteSats, testUser)
+	_, err := polls.Create(ctx, dbc, testQuestion, testInvoice,"", testRepay, testExpiry, testVoteSats)
 	assert.NoError(t, err)
 
 	pList, err := polls.ListByStatus(ctx, dbc, types.PollStatusCreated)
@@ -57,7 +57,7 @@ func TestListByStatus(t *testing.T) {
 
 func TestUpdateStatus(t *testing.T) {
 	ctx, dbc := setup(t)
-	id, err := polls.Create(ctx, dbc, testQuestion, testInvoice, testRepay, testExpiry, testVoteSats, testUser)
+	id, err := polls.Create(ctx, dbc, testQuestion, testInvoice, "",  testRepay, testExpiry, testVoteSats)
 	assert.NoError(t, err)
 
 	err = polls.UpdateStatus(ctx, dbc, id, types.PollStatusCreated, types.PollStatusClosed)

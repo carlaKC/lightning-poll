@@ -11,20 +11,23 @@ import (
 	ext_types "lightning-poll/types"
 )
 
-var cols = "id, status, created_at,expires_at, question, expiry_seconds, repay_scheme, vote_sats, payout_invoice, user_id"
+var cols = "id, status, created_at,expires_at, question, expiry_seconds, repay_scheme, vote_sats, payout_invoice"
 
 type row interface {
 	Scan(dest ...interface{}) error
 }
 
-func Create(ctx context.Context, dbc *sql.DB, question, payoutInvoice string,
-	repayScheme ext_types.RepayScheme, expirySeconds, voteSats, userID int64) (int64, error) {
+func Create(ctx context.Context, dbc *sql.DB, question, payoutInvoice, email string,
+	repayScheme ext_types.RepayScheme, expirySeconds, voteSats int64) (int64, error) {
+
 	id := rand.Int63()
+	nullEmail := sql.NullString{String:email, Valid:email!=""}
 
 	r, err := dbc.ExecContext(ctx, "insert into polls set id=?, status=?, "+
-		"created_at=now(), expires_at=DATE_ADD(now(), INTERVAL ? SECOND), question=?, expiry_seconds=?, repay_scheme=?, "+
-		"vote_sats=?, payout_invoice=?, user_id=?", id, types.PollStatusCreated, expirySeconds,
-		question, expirySeconds, repayScheme, voteSats, payoutInvoice, userID)
+		"created_at=now(), expires_at=DATE_ADD(now(), INTERVAL ? SECOND), question=?," +
+		" expiry_seconds=?, repay_scheme=?, vote_sats=?, payout_invoice=?, email=?",
+		id, types.PollStatusCreated, expirySeconds, question, expirySeconds,
+		repayScheme, voteSats, payoutInvoice, nullEmail)
 	if err != nil {
 		return 0, err
 	}
@@ -42,24 +45,19 @@ type DBPoll struct {
 	RepayScheme   ext_types.RepayScheme
 	VoteSats      int64
 	PayoutInvoice string
-	UserID        int64
 }
 
 func scan(r row) (poll DBPoll, err error) {
 	var invoice sql.NullString
-	var uid sql.NullInt64
 
 	err = r.Scan(&poll.ID, &poll.Status, &poll.CreatedAt, &poll.ExpiresAt, &poll.Question,
-		&poll.ExpirySeconds, &poll.RepayScheme, &poll.VoteSats, &invoice, &uid)
+		&poll.ExpirySeconds, &poll.RepayScheme, &poll.VoteSats, &invoice)
 	if err != nil {
 		return poll, err
 	}
 
 	if invoice.Valid {
 		poll.PayoutInvoice = invoice.String
-	}
-	if uid.Valid {
-		poll.UserID = uid.Int64
 	}
 
 	return poll, nil
@@ -117,6 +115,6 @@ func UpdateStatus(ctx context.Context, dbc *sql.DB, id int64, fromStatus, toStat
 
 // ListExpired returns a list of created votes which have expired
 func ListExpired(ctx context.Context, dbc *sql.DB) ([]*DBPoll, error) {
-	return list(ctx, dbc, "select * from polls where expires_at<now() "+
+	return list(ctx, dbc, "select "+cols+" from polls where expires_at<now() "+
 		"and status=?", types.PollStatusCreated)
 }

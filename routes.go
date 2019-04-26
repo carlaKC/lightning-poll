@@ -30,7 +30,7 @@ func (e *Env) GetLND() lnd.Client {
 	return e.lnd
 }
 
-func initializeRoutes(e Env) {
+func initializeRoutes(e *Env) {
 	router.GET("/", e.showHomePage)
 	router.GET("/create", e.createPollPage)
 	router.GET("/view/:id", e.viewPollPage)
@@ -187,6 +187,7 @@ func (e *Env) createPollPost(c *gin.Context) {
 	question := c.PostForm("question")
 	payReq := c.PostForm("invoice")
 	sats := getPostInt(c, "satoshis")
+	email := c.PostForm("email")
 
 	expiry := getPostInt(c, "expiry")
 	expirySeconds := expiry * 60 * 60 // hours to seconds
@@ -196,8 +197,8 @@ func (e *Env) createPollPost(c *gin.Context) {
 		c.Error(errors.New("Could not get options"))
 	}
 
-	id, err := polls.CreatePoll(context.Background(), e, question, payReq,
-		getPostInt(c, "payout"), options, expirySeconds, sats, 0)
+	id, err := polls.CreatePoll(context.Background(), e, question, payReq,email,
+		getPostInt(c, "payout"), options, expirySeconds, sats)
 	if err != nil {
 		c.AbortWithError(http.StatusInternalServerError, err)
 	}

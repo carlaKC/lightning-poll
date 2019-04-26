@@ -31,7 +31,7 @@ func main() {
 	if err != nil {
 		log.Fatalf("could not connect to LND: %v", err)
 	}
-	env := Env{db: dbc, lnd: lndCl}
+	env := &Env{db: dbc, lnd: lndCl}
 
 	votes.StartLoops(env)
 	polls.StartLoops(env)

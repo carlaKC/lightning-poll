@@ -27,7 +27,8 @@ var (
 	ErrPayoutExpiry   = errors.New("Payout invoice expires too soon")
 )
 
-func CreatePoll(ctx context.Context, b Backends, question, payReq string, repayScheme int64, options []string, expirySeconds, voteSats, userID int64) (int64, error) {
+func CreatePoll(ctx context.Context, b Backends, question, payReq, email string,
+	repayScheme int64, options []string, expirySeconds, voteSats int64) (int64, error) {
 	if err := validatePayout(ctx, b, payReq, expirySeconds); err != nil {
 		return 0, err
 	}
@@ -36,7 +37,7 @@ func CreatePoll(ctx context.Context, b Backends, question, payReq string, repayS
 	if !scheme.Valid() {
 		return 0, fmt.Errorf("Repay scheme: %v invalid", scheme)
 	}
-	id, err := poll_db.Create(ctx, b.GetDB(), question, payReq, scheme, expirySeconds, voteSats, userID)
+	id, err := poll_db.Create(ctx, b.GetDB(), question, payReq,email, scheme, expirySeconds, voteSats)
 	if err != nil {
 		return 0, err
 	}
@@ -137,13 +138,3 @@ func getList(ctx context.Context, b Backends, polls []*poll_db.DBPoll) ([]*Poll,
 	return pollList, nil
 }
 
-func FoceClosePoll(ctx context.Context, b Backends, id int64) error {
-	log.Printf("polls.ops: FoceClosePoll closing poll %v", id)
-
-	dbPoll, err := poll_db.Lookup(ctx, b.GetDB(), id)
-	if err != nil {
-		return err
-	}
-
-	return ClosePoll(ctx, b, dbPoll)
-}
