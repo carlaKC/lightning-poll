@@ -6,8 +6,8 @@ import (
 	"fmt"
 	"lightning-poll/votes"
 	"net/http"
+	"errors"
 	"strconv"
-	"strings"
 	"time"
 
 	"github.com/gin-gonic/gin"
@@ -22,11 +22,11 @@ type Env struct {
 	lnd lnd.Client
 }
 
-func (e Env) GetDB() *sql.DB {
+func (e *Env) GetDB() *sql.DB {
 	return e.db
 }
 
-func (e Env) GetLND() lnd.Client {
+func (e *Env) GetLND() lnd.Client {
 	return e.lnd
 }
 
@@ -191,12 +191,13 @@ func (e *Env) createPollPost(c *gin.Context) {
 	expiry := getPostInt(c, "expiry")
 	expirySeconds := expiry * 60 * 60 // hours to seconds
 
-	options := c.PostForm("added[]")
-
-	getPostInt(c, "payout")
+	options, ok := c.GetPostFormArray("option")
+	if !ok{
+		c.Error(errors.New("Could not get options"))
+	}
 
 	id, err := polls.CreatePoll(context.Background(), e, question, payReq,
-		getPostInt(c, "payout"), strings.Split(options, ","), expirySeconds, sats, 0)
+		getPostInt(c, "payout"), options, expirySeconds, sats, 0)
 	if err != nil {
 		c.AbortWithError(http.StatusInternalServerError, err)
 	}

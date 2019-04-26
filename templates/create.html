@@ -51,9 +51,8 @@
             <h2 class="text-headline">⚡ Create Lightning Poll ⚡</h2>
         </div>
 
-
         <div class="form-inputs">
-                <form id="create-poll" action="/create" method="POST">
+                <form id="create-poll" action="/create" method="POST" enctype="multipart/form-data">
                         <label for="question" class="text-small-uppercase">Question:</label>
                         <br>
                         <input class="text-body" id="question" name="question" type="text" required>
@@ -78,8 +77,6 @@
                     <p>Provide a <b>zero amount</b> invoice that has an expiry 24 hours > poll duration.</p>
                         <input class="text-body" id="invoice" name="invoice" type="text" required>
 
-                        <input type="hidden" name="added[]" id="added[]" value="">
-
                     <br>
                     <br>
 
@@ -96,20 +93,24 @@
                     {{end}}
                     <input type="hidden" id="payout_id" name="payout_id" type="text" required>
 
+                    <br>
+                    <br>
+
+                    <label >Options for poll:</label>
+                    <div id="options">
+                        <input class="text-body" class="option" id="option" name="option" type="text">
+                        <br>
+                        <br>
+                        <input class="text-body" class="option" id="option" name="option" type="text">
+                    </div>
                 </form>
             <br>
-            <label >Options for poll:</label>
-            <div id="options">
-                <input class="text-body" class="option" id="option" name="option" type="text">
-                <br>
-                <br>
-                <input class="text-body" class="option" id="option" name="option" type="text">
-            </div>
+
             <br>
             <button class="submit"  id="addOption" onclick="addOptionField()">Add Option</button>
             <br>
             <br>
-            <input class="submit" type="submit" form="create-poll" value="Create Poll" onclick="getOptions()">
+            <input class="submit" type="submit" form="create-poll" value="Create Poll">
 
         </div>
 
@@ -123,26 +124,11 @@
         input.className="text-body"
         input.id="option"
         input.type="text"
+        input.name="option"
 
         document.getElementById("options").append(document.createElement("br"));
         document.getElementById("options").append(document.createElement("br"));
         document.getElementById("options").append(input);
-    }
-
-    function getOptions(){
-        console.log("getOptions")
-        var added = [];
-        var add = document.getElementById("options").childNodes
-        for (i = 0; i < add.length; i++) {
-            console.log(add[i].type)
-            if (add[i].type == 'text'){
-                console.log(add[i].value)
-                added.push(add[i].value)
-            }
-        }
-        console.log(added)
-        debugger;
-        document.getElementById("added[]").setAttribute("value", added)
     }
 
 </script>
