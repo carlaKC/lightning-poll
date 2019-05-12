@@ -14,13 +14,16 @@ import (
 
 var router *gin.Engine
 
+var baseTemplates = flag.String("templates_base",
+	"/Users/carla/personal/src", "location of templates")
+
 func main() {
 	flag.Parse()
 
 	// Set the router as the default one provided by Gin
 	router = gin.Default()
 
-	router.LoadHTMLGlob("/Users/carla/personal/src/lightning-poll/templates/*")
+	router.LoadHTMLGlob(*baseTemplates+"/lightning-poll/templates/*")
 
 	dbc, err := db.Connect()
 	if err != nil {
