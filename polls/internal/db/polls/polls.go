@@ -21,12 +21,14 @@ func Create(ctx context.Context, dbc *sql.DB, question, payoutInvoice, email str
 	repayScheme ext_types.RepayScheme, expirySeconds, voteSats int64) (int64, error) {
 
 	id := rand.Int63()
-	nullEmail := sql.NullString{String:email, Valid:email!=""}
+	nullEmail := sql.NullString{String: email, Valid: email != ""}
+	expires := time.Duration(expirySeconds)
+	now := time.Now()
 
 	r, err := dbc.ExecContext(ctx, "insert into polls set id=?, status=?, "+
-		"created_at=now(), expires_at=DATE_ADD(now(), INTERVAL ? SECOND), question=?," +
-		" expiry_seconds=?, repay_scheme=?, vote_sats=?, payout_invoice=?, email=?",
-		id, types.PollStatusCreated, expirySeconds, question, expirySeconds,
+		"created_at=?, expires_at=?, question=?, expiry_seconds=?, repay_scheme=?, "+
+		"vote_sats=?, payout_invoice=?, email=?", id, types.PollStatusCreated, now,
+		now.Add(time.Second*expires), question, expirySeconds,
 		repayScheme, voteSats, payoutInvoice, nullEmail)
 	if err != nil {
 		return 0, err
