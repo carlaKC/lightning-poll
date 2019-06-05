@@ -6,12 +6,13 @@ type RepaySchemeFunc func(votes map[int64]int64, optionID int64) bool
 type RepayScheme int
 
 var (
-	RepaySchemeUnknown  RepayScheme = 0
-	RepaySchemeMajority RepayScheme = 1
-	RepaySchemeMinority RepayScheme = 2
-	RepaySchemeAll      RepayScheme = 3
-	RepaySchemeNone     RepayScheme = 4
-	repaySchemeSentinel RepayScheme = 5
+	RepaySchemeUnknown     RepayScheme = 0
+	RepaySchemeMajority    RepayScheme = 1
+	RepaySchemeNonMajority RepayScheme = 2
+	RepaySchemeAll         RepayScheme = 3
+	RepaySchemeNone        RepayScheme = 4
+	RepaySchemeMinority    RepayScheme = 5
+	repaySchemeSentinel    RepayScheme = 6
 )
 
 func (s RepayScheme) Valid() bool {
@@ -27,6 +28,9 @@ var (
 		return getExtreme(votes, optionID, func(challenge, existing int64) bool { return challenge > existing })
 	}
 	repayMinimum = func(votes map[int64]int64, optionID int64) bool {
+		return getExtreme(votes, optionID, func(challenge, existing int64) bool { return challenge < existing })
+	}
+	repayNonMajority = func(votes map[int64]int64, optionID int64) bool {
 		return !repayMaximum(votes, optionID)
 	}
 )
@@ -62,11 +66,12 @@ func getExtreme(votes map[int64]int64, optionID int64, beats func(challenge, exi
 }
 
 var schemes = map[RepayScheme]RepaySchemeFunc{
-	RepaySchemeUnknown:  neverRepay,
-	RepaySchemeMajority: repayMaximum,
-	RepaySchemeMinority: repayMinimum,
-	RepaySchemeAll:      alwaysRepay,
-	RepaySchemeNone:     neverRepay,
+	RepaySchemeUnknown:     neverRepay,
+	RepaySchemeMajority:    repayMaximum,
+	RepaySchemeNonMajority: repayNonMajority,
+	RepaySchemeAll:         alwaysRepay,
+	RepaySchemeNone:        neverRepay,
+	RepaySchemeMinority:    repayMinimum,
 }
 
 func (s RepayScheme) GetScheme() RepaySchemeFunc {
@@ -78,7 +83,7 @@ func (s RepayScheme) GetScheme() RepaySchemeFunc {
 	return scheme
 }
 
-func (s RepayScheme)GetDetails()RepayDetails{
+func (s RepayScheme) GetDetails() RepayDetails {
 	return allSchemes[s]
 }
 
@@ -88,19 +93,23 @@ type RepayDetails struct {
 }
 
 var allSchemes = map[RepayScheme]RepayDetails{
-	RepaySchemeMajority:{
-		Name:        "Repay Majority",
+	RepaySchemeMajority: {
+		Name:        "Repay most popular answer",
 		Description: "Repay voters who vote for the most popular option",
 	},
-	RepaySchemeMinority:{
-		Name:        "Repay Non-Majority",
+	RepaySchemeNonMajority: {
+		Name:        "Repay all, except most popular answer",
 		Description: "Repay voters who do not vote for the most popular option",
 	},
-	RepaySchemeAll:{
+	RepaySchemeMinority: {
+		Name:        "Repay least popular answer",
+		Description: "Repay voters who vote for the least popular option",
+	},
+	RepaySchemeAll: {
 		Name:        "Repay Everybody",
 		Description: "Repay all voters",
 	},
-	RepaySchemeNone:{
+	RepaySchemeNone: {
 		Name:        "Repay Nobody",
 		Description: "Repay no voters (bc broke or an asshole)",
 	},
@@ -109,4 +118,3 @@ var allSchemes = map[RepayScheme]RepayDetails{
 func GetRepaySchemes() map[RepayScheme]RepayDetails {
 	return allSchemes
 }
-

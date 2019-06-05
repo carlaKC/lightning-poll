@@ -184,7 +184,7 @@ func getPostInt(c *gin.Context, field string) int64 {
 }
 
 func (e *Env) createPollPost(c *gin.Context) {
-	ctx:= context.Background()
+	ctx := context.Background()
 
 	question := c.PostForm("question")
 	payReq := c.PostForm("invoice")
@@ -195,16 +195,16 @@ func (e *Env) createPollPost(c *gin.Context) {
 	expirySeconds := expiry * 60 * 60 // hours to seconds
 
 	options, ok := c.GetPostFormArray("option")
-	if !ok{
+	if !ok {
 		c.Error(errors.New("Could not get options"))
 	}
 
-	if err:= polls.ValidatePayout(ctx, e, payReq, expirySeconds); err!=nil{
+	if err := polls.ValidatePayout(ctx, e, payReq, expirySeconds); err != nil {
 		c.String(http.StatusBadRequest, err.Error())
 		return
 	}
 
-	id, err := polls.CreatePoll(context.Background(), e, question, payReq,email,
+	id, err := polls.CreatePoll(context.Background(), e, question, payReq, email,
 		getPostInt(c, "payout"), options, expirySeconds, sats)
 	if err != nil {
 		c.AbortWithError(http.StatusInternalServerError, err)

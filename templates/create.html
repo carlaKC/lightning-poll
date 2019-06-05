@@ -86,8 +86,8 @@
                     <br>
                     <br>
 
-                    <label for="payout" class="text-small-uppercase">Refund strategy:</label>
-                    <br>
+                    <label for="payout" class="text-small-uppercase">Voter Refund strategy:</label>
+                    <p>Choose how users will be paid out when the poll closes.</p>
                     {{range $key, $value := .repayment}}
                         <input type="radio" name="payout" value="{{$key}}" required > {{$value.Name}}<br>
                     {{end}}
