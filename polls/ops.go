@@ -29,7 +29,7 @@ var (
 
 func CreatePoll(ctx context.Context, b Backends, question, payReq, email string,
 	repayScheme int64, options []string, expirySeconds, voteSats int64) (int64, error) {
-	if err := validatePayout(ctx, b, payReq, expirySeconds); err != nil {
+	if err := ValidatePayout(ctx, b, payReq, expirySeconds); err != nil {
 		return 0, err
 	}
 
@@ -58,10 +58,10 @@ func CreatePoll(ctx context.Context, b Backends, question, payReq, email string,
 	return id, nil
 }
 
-// validatePayout ensures that the payout invoice provided by the poll creator
+// ValidatePayout ensures that the payout invoice provided by the poll creator
 // has a 0 amount, so we can specify any payment amount and that it has a sufficient
 // expiry buffer so that it does not expire before we can pay them out.
-func validatePayout(ctx context.Context, b Backends, payReq string, expirySeconds int64) error {
+func ValidatePayout(ctx context.Context, b Backends, payReq string, expirySeconds int64) error {
 	req, err := b.GetLND().DecodePaymentRequest(ctx, payReq)
 	if err != nil {
 		return err

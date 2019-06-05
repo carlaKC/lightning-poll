@@ -51,14 +51,14 @@
         <br>
         <br>
         {{ if .open}}
-            <h2>Open Polls</h2>
+            <h3>Open Polls</h3>
                 {{ range .open}}
                     <p><a href="/view/{{.ID}}">{{.Question}}</a></p>
                 {{end}}
         {{end}}
         <br>
         {{ if .closed}}
-            <h2>Closed Polls</h2>
+            <h3>Closed Polls</h3>
             {{ range .closed}}
                 <p><a href="/results/{{.ID}}">{{.Question}}</a></p>
             {{end}}

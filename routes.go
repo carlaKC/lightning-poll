@@ -3,10 +3,10 @@ package main
 import (
 	"context"
 	"database/sql"
+	"errors"
 	"fmt"
 	"lightning-poll/votes"
 	"net/http"
-	"errors"
 	"strconv"
 	"time"
 
@@ -184,6 +184,8 @@ func getPostInt(c *gin.Context, field string) int64 {
 }
 
 func (e *Env) createPollPost(c *gin.Context) {
+	ctx:= context.Background()
+
 	question := c.PostForm("question")
 	payReq := c.PostForm("invoice")
 	sats := getPostInt(c, "satoshis")
@@ -195,6 +197,11 @@ func (e *Env) createPollPost(c *gin.Context) {
 	options, ok := c.GetPostFormArray("option")
 	if !ok{
 		c.Error(errors.New("Could not get options"))
+	}
+
+	if err:= polls.ValidatePayout(ctx, e, payReq, expirySeconds); err!=nil{
+		c.String(http.StatusBadRequest, err.Error())
+		return
 	}
 
 	id, err := polls.CreatePoll(context.Background(), e, question, payReq,email,
