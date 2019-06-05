@@ -15,3 +15,15 @@ var (
 func (s PollStatus) Valid() bool {
 	return s > PollStatusUnknown && s < pollStatusSentinel
 }
+
+var strings = map[PollStatus]string{
+	PollStatusCreated:   "CREATED",
+	PollStatusClosed:    "CLOSED",
+	PollStatusReleased:  "RELEASED",
+	PollStatusPayingOut: "PAYING_OUT",
+	PollStatusPaidOut:   "PAID_OUT",
+}
+
+func (s PollStatus) String() string {
+	return strings[s]
+}

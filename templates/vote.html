@@ -36,6 +36,8 @@
 </head>
 <body>
 <h1>Vote for: {{.poll.Question}}</h1>
+<p>Note that votes use HODL invoices so that they can be refunded.</p>
+<p>They will "hang" until they are released or settled when the poll closes.</p>
 <img src=" https://api.qrserver.com/v1/create-qr-code/?data=lightning:{{.vote.PayReq}}&size=300x300">
 <br>
 <br>
@@ -47,6 +49,8 @@
 <form action="/results/{{.poll.ID}}" method="GET">
     <button class="submit">See Results</button>
 </form>
+<br>
+<p>That this page does not refresh upon payments (working on it)</p>
 </body>
 </html>
 

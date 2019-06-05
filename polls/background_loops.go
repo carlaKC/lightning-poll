@@ -14,6 +14,7 @@ import (
 
 func StartLoops(b Backends) {
 	go closePollsForever(b)
+	go updateMetricsForever(b)
 }
 
 func closePollsForever(b Backends) {
