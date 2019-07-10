@@ -5,12 +5,11 @@ import (
 	"database/sql"
 	"testing"
 
+	"github.com/carlaKC/lightning-poll/db"
+	"github.com/carlaKC/lightning-poll/polls/internal/db/polls"
+	"github.com/carlaKC/lightning-poll/polls/internal/types"
+	ext_types "github.com/carlaKC/lightning-poll/types"
 	"github.com/stretchr/testify/assert"
-
-	"lightning-poll/db"
-	"lightning-poll/polls/internal/db/polls"
-	"lightning-poll/polls/internal/types"
-	ext_types "lightning-poll/types"
 )
 
 var (
@@ -28,13 +27,13 @@ func setup(t *testing.T) (context.Context, *sql.DB) {
 
 func TestCreate(t *testing.T) {
 	ctx, dbc := setup(t)
-	_, err := polls.Create(ctx, dbc, testQuestion, testInvoice, "",  testRepay, testExpiry, testVoteSats)
+	_, err := polls.Create(ctx, dbc, testQuestion, testInvoice, "", testRepay, testExpiry, testVoteSats)
 	assert.NoError(t, err)
 }
 
 func TestLookup(t *testing.T) {
 	ctx, dbc := setup(t)
-	id, err := polls.Create(ctx, dbc, testQuestion, testInvoice, "",  testRepay, testExpiry, testVoteSats)
+	id, err := polls.Create(ctx, dbc, testQuestion, testInvoice, "", testRepay, testExpiry, testVoteSats)
 	assert.NoError(t, err)
 
 	_, err = polls.Lookup(ctx, dbc, id)
@@ -43,7 +42,7 @@ func TestLookup(t *testing.T) {
 
 func TestListByStatus(t *testing.T) {
 	ctx, dbc := setup(t)
-	_, err := polls.Create(ctx, dbc, testQuestion, testInvoice,"", testRepay, testExpiry, testVoteSats)
+	_, err := polls.Create(ctx, dbc, testQuestion, testInvoice, "", testRepay, testExpiry, testVoteSats)
 	assert.NoError(t, err)
 
 	pList, err := polls.ListByStatus(ctx, dbc, types.PollStatusCreated)
@@ -57,7 +56,7 @@ func TestListByStatus(t *testing.T) {
 
 func TestUpdateStatus(t *testing.T) {
 	ctx, dbc := setup(t)
-	id, err := polls.Create(ctx, dbc, testQuestion, testInvoice, "",  testRepay, testExpiry, testVoteSats)
+	id, err := polls.Create(ctx, dbc, testQuestion, testInvoice, "", testRepay, testExpiry, testVoteSats)
 	assert.NoError(t, err)
 
 	err = polls.UpdateStatus(ctx, dbc, id, types.PollStatusCreated, types.PollStatusClosed)

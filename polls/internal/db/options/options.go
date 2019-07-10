@@ -3,8 +3,9 @@ package options
 import (
 	"context"
 	"database/sql"
-	"lightning-poll/db"
 	"math/rand"
+
+	"github.com/carlaKC/lightning-poll/db"
 )
 
 var cols = "id, poll_id, value"

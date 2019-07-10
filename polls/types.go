@@ -3,7 +3,7 @@ package polls
 import (
 	"time"
 
-	"lightning-poll/types"
+	"github.com/carlaKC/lightning-poll/types"
 )
 
 type Poll struct {

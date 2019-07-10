@@ -2,20 +2,19 @@ package main
 
 import (
 	"flag"
-	"lightning-poll/polls"
-	"lightning-poll/votes"
 	"log"
 
+	"github.com/carlaKC/lightning-poll/db"
+	"github.com/carlaKC/lightning-poll/lnd"
+	"github.com/carlaKC/lightning-poll/polls"
+	"github.com/carlaKC/lightning-poll/votes"
 	"github.com/gin-gonic/gin"
-
-	"lightning-poll/db"
-	"lightning-poll/lnd"
 )
 
 var router *gin.Engine
 
 var baseTemplates = flag.String("templates_base",
-	"/Users/carla/personal/src", "location of templates")
+	"/Users/carla/personal/src/github.com/carlaKC", "location of templates")
 
 func main() {
 	flag.Parse()
@@ -23,7 +22,7 @@ func main() {
 	// Set the router as the default one provided by Gin
 	router = gin.Default()
 
-	router.LoadHTMLGlob(*baseTemplates+"/lightning-poll/templates/*")
+	router.LoadHTMLGlob(*baseTemplates + "/lightning-poll/templates/*")
 
 	dbc, err := db.Connect()
 	if err != nil {

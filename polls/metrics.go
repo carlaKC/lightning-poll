@@ -5,10 +5,9 @@ import (
 	"log"
 	"time"
 
+	poll_db "github.com/carlaKC/lightning-poll/polls/internal/db/polls"
+	"github.com/carlaKC/lightning-poll/polls/internal/types"
 	"github.com/prometheus/client_golang/prometheus"
-
-	poll_db "lightning-poll/polls/internal/db/polls"
-	"lightning-poll/polls/internal/types"
 )
 
 var pollCount = prometheus.NewGaugeVec(prometheus.GaugeOpts{

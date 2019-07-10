@@ -7,10 +7,9 @@ import (
 	"encoding/hex"
 	"errors"
 
+	"github.com/lightningnetwork/lnd/lnrpc"
 	"github.com/lightningnetwork/lnd/lnrpc/invoicesrpc"
 	"google.golang.org/grpc"
-
-	"github.com/lightningnetwork/lnd/lnrpc"
 )
 
 type MockLND struct {

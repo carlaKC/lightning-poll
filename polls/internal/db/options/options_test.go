@@ -5,10 +5,9 @@ import (
 	"database/sql"
 	"testing"
 
+	"github.com/carlaKC/lightning-poll/db"
+	"github.com/carlaKC/lightning-poll/polls/internal/db/options"
 	"github.com/stretchr/testify/assert"
-
-	"lightning-poll/db"
-	"lightning-poll/polls/internal/db/options"
 )
 
 var (

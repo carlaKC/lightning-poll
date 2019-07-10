@@ -133,7 +133,7 @@ func (cl *client) SubscribeInvoice(ctx context.Context, id int64, paymentHash st
 		return nil, err
 	}
 
-	return cl.invoiceClient.SubscribeSingleInvoice(ctx, &lnrpc.PaymentHash{RHashStr: paymentHash, RHash: hash})
+	return cl.invoiceClient.SubscribeSingleInvoice(ctx, &invoicesrpc.SubscribeSingleInvoiceRequest{RHash: hash})
 }
 
 func (cl *client) DecodePaymentRequest(ctx context.Context, request string) (*lnrpc.PayReq, error) {

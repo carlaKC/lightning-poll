@@ -4,14 +4,13 @@ import (
 	"context"
 	"database/sql"
 	"encoding/hex"
-	"lightning-poll/lnd"
 	"log"
 
+	"github.com/carlaKC/lightning-poll/lnd"
+	ext_types "github.com/carlaKC/lightning-poll/types"
+	votes_db "github.com/carlaKC/lightning-poll/votes/internal/db/votes"
+	"github.com/carlaKC/lightning-poll/votes/internal/types"
 	"github.com/lightningnetwork/lnd/lnrpc"
-
-	ext_types "lightning-poll/types"
-	votes_db "lightning-poll/votes/internal/db/votes"
-	"lightning-poll/votes/internal/types"
 )
 
 type Backends interface {

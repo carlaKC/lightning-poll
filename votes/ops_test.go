@@ -3,14 +3,13 @@ package votes_test
 import (
 	"context"
 	"database/sql"
-	"lightning-poll/db"
-	"lightning-poll/lnd"
-	"lightning-poll/votes"
-	"lightning-poll/votes/internal/types"
 	"testing"
 
-	votes_db "lightning-poll/votes/internal/db/votes"
-
+	"github.com/carlaKC/lightning-poll/db"
+	"github.com/carlaKC/lightning-poll/lnd"
+	"github.com/carlaKC/lightning-poll/votes"
+	votes_db "github.com/carlaKC/lightning-poll/votes/internal/db/votes"
+	"github.com/carlaKC/lightning-poll/votes/internal/types"
 	"github.com/stretchr/testify/assert"
 )
 

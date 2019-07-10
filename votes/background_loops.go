@@ -6,10 +6,9 @@ import (
 	"log"
 	"time"
 
+	votes_db "github.com/carlaKC/lightning-poll/votes/internal/db/votes"
+	"github.com/carlaKC/lightning-poll/votes/internal/types"
 	"github.com/lightningnetwork/lnd/lnrpc"
-
-	votes_db "lightning-poll/votes/internal/db/votes"
-	"lightning-poll/votes/internal/types"
 )
 
 func StartLoops(b Backends) {

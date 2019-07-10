@@ -6,9 +6,9 @@ import (
 	"math/rand"
 	"time"
 
-	"lightning-poll/db"
-	"lightning-poll/polls/internal/types"
-	ext_types "lightning-poll/types"
+	"github.com/carlaKC/lightning-poll/db"
+	"github.com/carlaKC/lightning-poll/polls/internal/types"
+	ext_types "github.com/carlaKC/lightning-poll/types"
 )
 
 var cols = "id, status, created_at,expires_at, question, expiry_seconds, repay_scheme, vote_sats, payout_invoice"

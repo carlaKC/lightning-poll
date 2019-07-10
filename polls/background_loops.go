@@ -5,11 +5,10 @@ import (
 	"log"
 	"time"
 
+	poll_db "github.com/carlaKC/lightning-poll/polls/internal/db/polls"
+	"github.com/carlaKC/lightning-poll/polls/internal/types"
+	"github.com/carlaKC/lightning-poll/votes"
 	"golang.org/x/net/context"
-
-	poll_db "lightning-poll/polls/internal/db/polls"
-	"lightning-poll/polls/internal/types"
-	"lightning-poll/votes"
 )
 
 func StartLoops(b Backends) {

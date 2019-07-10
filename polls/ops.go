@@ -4,22 +4,21 @@ import (
 	"context"
 	"database/sql"
 	"fmt"
-	"lightning-poll/lnd"
 	"log"
 
+	lnd_cl "github.com/carlaKC/lightning-poll/lnd"
+	options_db "github.com/carlaKC/lightning-poll/polls/internal/db/options"
+	poll_db "github.com/carlaKC/lightning-poll/polls/internal/db/polls"
+	"github.com/carlaKC/lightning-poll/polls/internal/types"
+	ext_types "github.com/carlaKC/lightning-poll/types"
 	"github.com/pkg/errors"
-
-	options_db "lightning-poll/polls/internal/db/options"
-	poll_db "lightning-poll/polls/internal/db/polls"
-	"lightning-poll/polls/internal/types"
-	ext_types "lightning-poll/types"
 )
 
 var expiryBufferSeconds int64 = 60 * 60 * 12 // 12 hours in seconds
 
 type Backends interface {
 	GetDB() *sql.DB
-	GetLND() lnd.Client
+	GetLND() lnd_cl.Client
 }
 
 var (
@@ -37,7 +36,7 @@ func CreatePoll(ctx context.Context, b Backends, question, payReq, email string,
 	if !scheme.Valid() {
 		return 0, fmt.Errorf("Repay scheme: %v invalid", scheme)
 	}
-	id, err := poll_db.Create(ctx, b.GetDB(), question, payReq,email, scheme, expirySeconds, voteSats)
+	id, err := poll_db.Create(ctx, b.GetDB(), question, payReq, email, scheme, expirySeconds, voteSats)
 	if err != nil {
 		return 0, err
 	}
@@ -138,4 +137,3 @@ func getList(ctx context.Context, b Backends, polls []*poll_db.DBPoll) ([]*Poll,
 
 	return pollList, nil
 }
-

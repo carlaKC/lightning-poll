@@ -5,28 +5,28 @@ import (
 	"database/sql"
 	"errors"
 	"fmt"
-	"lightning-poll/votes"
+
 	"net/http"
 	"strconv"
 	"time"
 
+	lnd_cl "github.com/carlaKC/lightning-poll/lnd"
+	"github.com/carlaKC/lightning-poll/polls"
+	"github.com/carlaKC/lightning-poll/types"
+	"github.com/carlaKC/lightning-poll/votes"
 	"github.com/gin-gonic/gin"
-
-	"lightning-poll/lnd"
-	"lightning-poll/polls"
-	"lightning-poll/types"
 )
 
 type Env struct {
 	db  *sql.DB
-	lnd lnd.Client
+	lnd lnd_cl.Client
 }
 
 func (e *Env) GetDB() *sql.DB {
 	return e.db
 }
 
-func (e *Env) GetLND() lnd.Client {
+func (e *Env) GetLND() lnd_cl.Client {
 	return e.lnd
 }
 
@@ -56,7 +56,7 @@ func (e *Env) showHomePage(c *gin.Context) {
 		http.StatusOK,
 		"home.html",
 		gin.H{
-			"title":  "Lightning Poll - Home",
+			"title":  "github.com/carlaKC/lightning Poll - Home",
 			"open":   open,
 			"closed": inactive,
 		},
@@ -70,7 +70,7 @@ func (e *Env) createPollPage(c *gin.Context) {
 		http.StatusOK,
 		"create.html",
 		gin.H{
-			"title":     "Lightning Poll - Create",
+			"title":     "github.com/carlaKC/lightning Poll - Create",
 			"repayment": types.GetRepaySchemes(),
 		},
 	)
@@ -88,7 +88,7 @@ func (e *Env) viewPollPage(c *gin.Context) {
 		http.StatusOK,
 		"view.html",
 		gin.H{
-			"title":   "Lightning Poll - View Poll",
+			"title":   "github.com/carlaKC/lightning Poll - View Poll",
 			"poll":    poll,
 			"is_open": time.Now().Before(poll.ClosesAt),
 			"unix":    int64(poll.ClosesAt.Unix()),
@@ -113,7 +113,7 @@ func (e *Env) viewVotePage(c *gin.Context) {
 		http.StatusOK,
 		"vote.html",
 		gin.H{
-			"title": "Lightning Poll - View Vote",
+			"title": "github.com/carlaKC/lightning Poll - View Vote",
 			"poll":  poll,
 			"vote":  vote,
 		},
@@ -154,7 +154,7 @@ func (e *Env) viewPollResults(c *gin.Context) {
 		http.StatusOK,
 		"results.html",
 		gin.H{
-			"title":  "Lightning Poll - View Poll Results",
+			"title":  "github.com/carlaKC/lightning Poll - View Poll Results",
 			"poll":   poll,
 			"xScale": xScale,
 			"yScale": yScale,

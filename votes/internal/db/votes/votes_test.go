@@ -3,9 +3,9 @@ package votes_test
 import (
 	"context"
 	"database/sql"
-	"lightning-poll/db"
-	"lightning-poll/votes/internal/db/votes"
-	"lightning-poll/votes/internal/types"
+	"github.com/carlaKC/lightning-poll/db"
+	"github.com/carlaKC/lightning-poll/votes/internal/db/votes"
+	"github.com/carlaKC/lightning-poll/votes/internal/types"
 	"testing"
 	"time"
 
