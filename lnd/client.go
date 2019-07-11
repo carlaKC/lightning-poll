@@ -6,6 +6,7 @@ import (
 	"crypto/sha256"
 	"encoding/hex"
 	"flag"
+	"io/ioutil"
 	"log"
 
 	"github.com/lightningnetwork/lnd/lnrpc"
@@ -13,10 +14,14 @@ import (
 	"github.com/pkg/errors"
 	"google.golang.org/grpc"
 	"google.golang.org/grpc/credentials"
+	"google.golang.org/grpc/metadata"
 )
 
-var lnd_address = flag.String("lnd_address", "127.0.0.1:10001", "LND rpc server address")
-var lnd_cert = flag.String("lnd_cert", "/home/lnd/.lnd/tls.cert", "lnd cert location")
+var (
+	lnd_address   = flag.String("lnd_address", "127.0.0.1:10001", "LND rpc server address")
+	lnd_cert      = flag.String("lnd_cert", "/home/lnd/.lnd/tls.cert", "lnd cert location")
+	macaroon_path = flag.String("macaroon_path", "/home/lnd/.lnd/admin.macaroon", "LND admin macaroon location")
+)
 
 type Client interface {
 	AddInvoice(ctx context.Context, amount, expirySeconds int64, note string) (*lnrpc.Invoice, error)
@@ -33,6 +38,7 @@ type client struct {
 	rpcConn       *grpc.ClientConn
 	rpcClient     lnrpc.LightningClient
 	invoiceClient invoicesrpc.InvoicesClient
+	macaroon      string
 }
 
 type HoldInvoice struct {
@@ -49,7 +55,18 @@ func New() (Client, error) {
 		return nil, errors.Wrap(err, "cl.connect error")
 	}
 
+	dat, err := ioutil.ReadFile(*macaroon_path)
+	if err != nil {
+		return nil, err
+	}
+	cl.macaroon = hex.EncodeToString(dat)
+
 	return cl, nil
+}
+
+func (cl *client) macaroonCtx(ctx context.Context) context.Context {
+	return metadata.AppendToOutgoingContext(
+		ctx, "macaroon", cl.macaroon)
 }
 
 func (cl *client) connect(address, cert, serverNameOverride string) error {
@@ -76,7 +93,7 @@ func (cl *client) AddInvoice(ctx context.Context, amount, expirySeconds int64, n
 		Memo:   note,
 	}
 
-	resp, err := cl.rpcClient.AddInvoice(ctx, inv)
+	resp, err := cl.rpcClient.AddInvoice(cl.macaroonCtx(ctx), inv)
 	if err != nil {
 		return nil, err
 	}
@@ -91,8 +108,14 @@ func (cl *client) AddHoldInvoice(ctx context.Context, amount, expirySeconds int6
 	rand.Read(paymentPreimage[:])
 	paymentHash := sha256.Sum256(paymentPreimage[:])
 
-	resp, err := cl.invoiceClient.AddHoldInvoice(ctx,
-		&invoicesrpc.AddHoldInvoiceRequest{Value: amount, Expiry: expirySeconds, Hash: paymentHash[:], Memo: note})
+	resp, err := cl.invoiceClient.AddHoldInvoice(
+		cl.macaroonCtx(ctx),
+		&invoicesrpc.AddHoldInvoiceRequest{
+			Value:  amount,
+			Expiry: expirySeconds,
+			Hash:   paymentHash[:],
+			Memo:   note,
+		})
 	if err != nil {
 		return nil, err
 	}
@@ -110,19 +133,28 @@ func (cl *client) CancelHoldInvoice(ctx context.Context, hash string) error {
 		return err
 	}
 
-	_, err = cl.invoiceClient.CancelInvoice(ctx, &invoicesrpc.CancelInvoiceMsg{PaymentHash: hashBytes})
+	_, err = cl.invoiceClient.CancelInvoice(
+		cl.macaroonCtx(ctx),
+		&invoicesrpc.CancelInvoiceMsg{
+			PaymentHash: hashBytes,
+		})
 	return err
 }
 
 func (cl *client) SettleHoldInvoice(ctx context.Context, preimage []byte) error {
-	_, err := cl.invoiceClient.SettleInvoice(ctx, &invoicesrpc.SettleInvoiceMsg{Preimage: preimage})
+	_, err := cl.invoiceClient.SettleInvoice(
+		cl.macaroonCtx(ctx),
+		&invoicesrpc.SettleInvoiceMsg{Preimage: preimage},
+	)
 	return err
 }
 
 func (cl *client) LookupInvoice(ctx context.Context, paymentHash string) (*lnrpc.Invoice, error) {
-	return cl.rpcClient.LookupInvoice(ctx, &lnrpc.PaymentHash{
-		RHashStr: paymentHash,
-	})
+	return cl.rpcClient.LookupInvoice(
+		cl.macaroonCtx(ctx),
+		&lnrpc.PaymentHash{
+			RHashStr: paymentHash,
+		})
 }
 
 func (cl *client) SubscribeInvoice(ctx context.Context, id int64, paymentHash string) (invoicesrpc.Invoices_SubscribeSingleInvoiceClient, error) {
@@ -133,13 +165,27 @@ func (cl *client) SubscribeInvoice(ctx context.Context, id int64, paymentHash st
 		return nil, err
 	}
 
-	return cl.invoiceClient.SubscribeSingleInvoice(ctx, &invoicesrpc.SubscribeSingleInvoiceRequest{RHash: hash})
+	return cl.invoiceClient.SubscribeSingleInvoice(
+		cl.macaroonCtx(ctx),
+		&invoicesrpc.SubscribeSingleInvoiceRequest{
+			RHash: hash,
+		})
 }
 
 func (cl *client) DecodePaymentRequest(ctx context.Context, request string) (*lnrpc.PayReq, error) {
-	return cl.rpcClient.DecodePayReq(ctx, &lnrpc.PayReqString{PayReq: request})
+	return cl.rpcClient.DecodePayReq(
+		cl.macaroonCtx(ctx),
+		&lnrpc.PayReqString{
+			PayReq: request,
+		},
+	)
 }
 
 func (cl *client) SendPaymentSync(ctx context.Context, payReq string, amount int64) (*lnrpc.SendResponse, error) {
-	return cl.rpcClient.SendPaymentSync(ctx, &lnrpc.SendRequest{PaymentRequest: payReq, Amt: amount})
+	return cl.rpcClient.SendPaymentSync(
+		cl.macaroonCtx(ctx),
+		&lnrpc.SendRequest{
+			PaymentRequest: payReq,
+			Amt:            amount,
+		})
 }
